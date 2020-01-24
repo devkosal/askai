@@ -107,6 +107,7 @@ class AvgStatsCallback(Callback):
 # For progress bar    
 # https://github.com/fastai/course-v3/blob/master/nbs/dl2/09c_add_progress_bar.ipynb
 class AvgStatsCallback(Callback):
+    _order=1
     def __init__(self, metrics):
         self.train_stats,self.valid_stats = AvgStats(metrics,True),AvgStats(metrics,False)
     
