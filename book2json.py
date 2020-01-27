@@ -25,39 +25,39 @@ def splitter(string,final=[]):
     return final
 
 
-def parser(input_html_file, output_dir=".", max_seq_len=300):
+def parser(input_html_file, output_dir=".", max_seq_len=400):
     assert os.path.exists(output_dir), f"output_dir: {output_dir} does not exist"
     output_dir = Path(output_dir)
 
     book = textract.process(input_html_file,encoding='unicode_escape')
     book = re.sub("\\\+[n,u]?"," ",str(book))
 
-    raw_sents = tokenize.sent_tokenize(book)
+    raw_chunks = tokenize.sent_tokenize(book)
 
-    sents, rejects = [],0
-    len_spaces = [(len(s),Counter(s)[" "]/len(s)) for s in raw_sents]
+    chunks, rejects = [],0
+    len_spaces = [(len(s),Counter(s)[" "]/len(s)) for s in raw_chunks]
     lens, spaces = zip(*len_spaces)
-    split_lens = [len(s.split()) for s in raw_sents]; split_lens
+    split_lens = [len(s.split()) for s in raw_chunks]; split_lens
     lim = np.quantile(lens,.1)
 
-    for i,sent in enumerate(raw_sents):
+    for i,sent in enumerate(raw_chunks):
         conds = lens[i] > lim and sent[-1] != "?" and spaces[i] < .4
         if conds:
             if split_lens[i] > 300:
-                for s in splitter(sent): sents.append(s)
-            else:    sents.append(sent)
+                for s in splitter(sent): chunks.append(s)
+            else:    chunks.append(sent)
         else:
             rejects += 1
 
-    logger.info(f"dropped {rejects} out {len(raw_sents)} of sections")
+    logger.info(f"dropped {rejects} out {len(raw_chunks)} of sections")
 
-    sents_dict = [{"id":str(i),"text":sent} for i,sent in enumerate(sents)]
+    chunks_dict = [{"id":str(i),"text":sent} for i,sent in enumerate(chunks)]
 
     with open(output_dir/'result.jsonl', 'w+') as f:
-        for d in sents_dict:
+        for d in chunks_dict:
             json.dump(d, f)
             f.write("\n")
-    logger.info(f"saved {len(sents_dict)} sentences in result.jsonl in output_dir {output_dir}")
+    logger.info(f"saved {len(chunks_dict)} sentences in result.jsonl in output_dir {output_dir}")
 
 if __name__ == "__main__" :
     logging.basicConfig()
@@ -77,8 +77,8 @@ if __name__ == "__main__" :
 # vectorizer_tfidf = TfidfVectorizer(stop_words='english')
 #
 #
-# vectors_tfidf = vectorizer_tfidf.fit_transform(sents)
+# vectors_tfidf = vectorizer_tfidf.fit_transform(chunks)
 #
 #
 # vectorizer_tfidf.get_feature_names()
-# df = pd.DataFrame({"id":[i for i,_ in enumerate(sents)],"sent":sents})
+# df = pd.DataFrame({"id":[i for i,_ in enumerate(chunks)],"sent":chunks})
