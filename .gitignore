@@ -1,7 +1,7 @@
 **/.ipynb_checkpoints
 **/__pycache__
 **/checkpoints
-**/sample_books
+**/books
 *.jsonl
 *.npz
 *.db
