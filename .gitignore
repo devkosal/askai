@@ -3,5 +3,5 @@
 **/checkpoints
 **/books
 *.jsonl
-*.npz
-*.db
+*.zip
+model/

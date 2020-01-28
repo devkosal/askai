@@ -88,23 +88,3 @@ if __name__ == "__main__" :
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     fire.Fire(parser)
-
-
-
-# test
-# parser("tbqa/albert-qa/books/Health Science 100 V3.html","./tbqa/albert-qa")
-# terminal: book2json.py "books/Introductory Chemistry.html" . 300
-# test
-# l = splitter("a "*1000); len(l)
-
-# from sklearn.feature_extraction.text import TfidfVectorizer
-#
-#
-# vectorizer_tfidf = TfidfVectorizer(stop_words='english')
-#
-#
-# vectors_tfidf = vectorizer_tfidf.fit_transform(chunks)
-#
-#
-# vectorizer_tfidf.get_feature_names()
-# df = pd.DataFrame({"id":[i for i,_ in enumerate(chunks)],"sent":chunks})
