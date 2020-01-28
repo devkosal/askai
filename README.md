@@ -39,7 +39,7 @@ We use TF-IDF embeddings to compare queries to sections. This helps us find rele
 
 ## Training ALBERT
 
-In this module, we will train Albert on the [SQuAD 1.1](https://rajpurkar.github.io/SQuAD-explorer/) dataset.
+In this module, we train Albert on the [SQuAD 1.1](https://rajpurkar.github.io/SQuAD-explorer/) dataset.
 
 
 
