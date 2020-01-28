@@ -23,9 +23,19 @@ This app uses Pyviz's Panel to serve the end application. Run the following comm
 
 ```panel serve --show "TextbookQA Sample App.ipynb"```
 
-## Parsing Large Documents
+## Building Embeddings
 
-Only HTML files
+### Parsing Large Documents
+
+Only HTML files of textbooks are accounted for at this time. Use the ```book_parser.py``` to convert your html file to csv or jsonl formats. If you want to convert to jsonl, add ``--jsonl``. 
+
+```python scripts/book_parser.py path/to/html/file path/to/output```
+
+### TF-IDF Embeddings 
+
+We use TF-IDF embeddings to compare queries to sections. This helps us find relevant sections. To build our TF-IDF vectorizer and sparse matrix embeddings, use:
+
+```python scripts/create_tfidf.py path/to/csv_or_db_file path/to/output```
 
 ## Training ALBERT
 
