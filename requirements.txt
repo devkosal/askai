@@ -5,7 +5,6 @@ pandas
 scikit-learn
 panel
 scipy
-json
 tqdm
 matplotlib
 fastprogress
