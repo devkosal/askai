@@ -16,4 +16,4 @@ RUN git clone https://github.com/devkosal/albert-qa --depth 1; \
       pip3 install -r "./albert-qa/requirements.txt"
 
 # CMD is used to set the command which will be run when the container starts
-CMD ["python3", "panel", "serve", "./albert-qa/TextbookQA_App.ipynb" ,"--port 5006"]
+CMD ["panel", "serve", "./albert-qa/TextbookQA_App.ipynb" ,"--port 5006"]

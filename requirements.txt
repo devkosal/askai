@@ -4,6 +4,7 @@ numpy
 pandas
 scikit-learn
 panel
+jupyter
 scipy
 tqdm
 matplotlib
