@@ -2,6 +2,9 @@ torch
 transformers
 numpy
 pandas
+scikit-learn
+panel
+scipy
 json
 tqdm
 matplotlib
