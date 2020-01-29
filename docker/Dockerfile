@@ -10,10 +10,12 @@ RUN apt-get update; \
      python3 get-pip.py ; \
      pip3 install torch numpy
 
-RUN apt-get install -y git
+RUN pip3 install torch transformers numpy pandas scikit-learn panel jupyter scipy
 
-RUN git clone https://github.com/devkosal/albert-qa --depth 1; \
-      pip3 install -r "./albert-qa/requirements.txt"
+ADD . ./albert-qa
+
+WORKDIR albert-qa/
 
 # CMD is used to set the command which will be run when the container starts
-CMD ["panel", "serve", "./albert-qa/TextbookQA_App.ipynb" ,"--port 5006"]
+CMD ["panel", "serve", "nb_TextbookQA.py" ,"--port=5006"]
+# panel serve TextbookQA_App.ipynb --port=5006
