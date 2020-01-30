@@ -1,6 +1,7 @@
 import os, json, pandas as pd, fire, re, logging
 from pathlib import Path
 from transformers import AutoTokenizer
+from tqdm import tqdm
 
 def squad_parser(directory, tok , data_set: str, squad_version: str = "2.0"):
     """
@@ -11,7 +12,7 @@ def squad_parser(directory, tok , data_set: str, squad_version: str = "2.0"):
     with open(Path(directory)/ds_dir) as f: file = json.load(f)
     ques, paras, answers, idxs, seq_lens = [],[],[],[],[]
     if ver2: is_impossibles = [] # if ver2, keep track of whether answer is impossible
-    for item in file["data"]:
+    for item in tqdm(file["data"]):
         for paragraphs in item["paragraphs"]:
             context = paragraphs["context"]
             tok_context = tok.tokenize(context)
