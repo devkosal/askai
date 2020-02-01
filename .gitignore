@@ -4,4 +4,5 @@
 **/books
 *.jsonl
 *.zip
+*.log
 models/
