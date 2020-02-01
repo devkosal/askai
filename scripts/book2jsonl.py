@@ -63,7 +63,7 @@ def soup_chunker(input_html_file):
             current.append(text)
     return chunks
 
-def parser(input_html_file, output_dir=".", output_level = "section", max_seq_len=400):
+def parser(input_html_file, output_dir=".", output_level = "section", max_seq_len=400, json_out=False):
     assert os.path.exists(output_dir), f"output_dir: {output_dir} does not exist"
     assert output_level in ["sentence","section"], "output_level must be sentence, paragrpah or section"
     output_dir = Path(output_dir)
@@ -75,13 +75,18 @@ def parser(input_html_file, output_dir=".", output_level = "section", max_seq_le
     elif output_level == "section":
         chunks = soup_chunker(input_html_file)
 
-    chunks_dict = [{"id":str(i),"text":sent} for i,sent in enumerate(chunks)]
-
-    with open(output_dir/"result.jsonl", 'w+') as f:
-        for d in chunks_dict:
-            json.dump(d, f)
-            f.write("\n")
-    logger.info(f"saved {len(chunks_dict)} chunks in result.jsonl in output_dir {output_dir}")
+    if json_out:
+        chunks_dict = [{"id":str(i),"text":sent} for i,sent in enumerate(chunks)]
+        with open(output_dir/"result.jsonl", 'w+') as f:
+            for d in chunks_dict:
+                json.dump(d, f)
+                f.write("\n")
+        logger.info(f"saved {len(chunks_dict)} chunks in result.jsonl in output_dir {output_dir}")
+    else:
+        df = pd.DataFrame({"text":chunks})
+        df.index.name = 'id'
+        df.to_csv("result.csv")
+        logger.info(f"saved {len(chunks)} chunks in result.csv in output_dir {output_dir}")
 
 if __name__ == "__main__" :
     logging.basicConfig()
