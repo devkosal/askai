@@ -10,7 +10,7 @@ def squad_parser(directory, tok , data_set: str, squad_version: str = "2.0"):
     ver2 = squad_version == "2.0"
     ds_dir = data_set + f"-v{squad_version}.json"
     with open(Path(directory)/ds_dir) as f: file = json.load(f)
-    ques, paras, answers, idxs, seq_lens = [],[],[],[],[]
+    ques, paras, answers, idxs, seq_lens,ans_texts = [],[],[],[],[],[]
     if ver2: is_impossibles = [] # if ver2, keep track of whether answer is impossible
     for item in tqdm(file["data"]):
         for paragraphs in item["paragraphs"]:
@@ -23,15 +23,17 @@ def squad_parser(directory, tok , data_set: str, squad_version: str = "2.0"):
                 if ver2: is_impossible = qas["is_impossible"]
                 answers_type = "plausible_answers" if is_impossible else "answers"
                 for answer in qas[answers_type]:
+                    seq_len = len(tok_context + tok_question)
                     start_idx = len(tok_question + tok.tokenize(context[:answer["answer_start"]]))
-                    end_idx = start_idx + len(tok.tokenize(answer["text"]))
+                    end_idx = min(start_idx + len(tok.tokenize(answer["text"])),seq_len) # some idxs split mid words so end idx length can get offset, this prevetns us from going past the seq_len 
                     ques.append(question)
                     paras.append(context)
                     answers.append((tok_question + tok_context)[start_idx:end_idx])
                     idxs.append([start_idx,end_idx])
-                    seq_lens.append(len(tok_context + tok_question))
+                    seq_lens.append(seq_len)
+                    ans_texts.append(answer["text"])
                     if ver2: is_impossibles.append(is_impossible)
-    res = {"question":ques,"paragraph" : paras, "answer":answers, "idxs":idxs, "seq_len":seq_lens}
+    res = {"question":ques,"paragraph" : paras, "answer":answers, "idxs":idxs, "seq_len":seq_lens,"ans_text":ans_texts}
     if ver2: res["is_impossible"] = is_impossibles
     return pd.DataFrame(res)
 
