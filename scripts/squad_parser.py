@@ -39,7 +39,7 @@ def squad_parser(directory, tok , data_set: str, squad_version: str = "2.0"):
 
 
 def squad_json_to_csv(path_to_jsons_dir, path_to_csv_dir=None, model="albert-base-v2",squad_version="2.0"):
-    assert squad_version in ["1.1", "2.0"], f"please enter a valid squad_version: 1.1 or 2.0, not {squad_version}"
+    assert str(squad_version) in ["1.1", "2.0"], f"please enter a valid squad_version: 1.1 or 2.0, not {squad_version}"
     if path_to_csv_dir is None: path_to_csv_dir = path_to_jsons_dir
     tok = AutoTokenizer.from_pretrained(model)
     model_name = re.findall(r"(.+?)-",model)[0]
