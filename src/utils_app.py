@@ -6,6 +6,7 @@ from .text import pad_collate_x
 from .utils import listify
 from itertools import compress
 import sqlite3
+import re
 
 # doc retrieval function
 def get_doc_by_id(doc_id, cursor):
@@ -17,6 +18,14 @@ def get_scores(text, vectorizer, X):
     rows, _ = comp.nonzero()
     d = {i:float(comp[i,].todense()) for i in rows}
     return sorted(d.items(), key=lambda x: x[1], reverse=True)
+
+def bold_answer(text, answer):
+    p1 = re.compile(f"{answer}",re.IGNORECASE)
+    answers = re.findall(p1, text)
+    if len(answers) < 1: return text
+    answer = answers[0] # selecting the first occurence
+    p2 = re.compile(f"(.?){answer}(.?)",re.IGNORECASE)
+    return p2.sub(f'\\1**{answer}**\\2', text)
 
 def get_contexts(scored_sections,cursor_or_df,k=5,p=.7):
     top_docs = scored_sections[:k]
@@ -64,10 +73,14 @@ def get_pred(texts, question, model, tok, pad_idx):
         if start > end: return
         elif start == end: end += 1
         pred = tok.convert_ids_to_tokens(input_ids[idx][start:end])
-        return tok.convert_tokens_to_string(pred)
+        pred = tok.convert_tokens_to_string(pred)
+        return pred.replace("<unk>","")
 
     # find the best answer
     for i,s in enumerate(sorted_sums):
         ans = _proc1(s,starts[s],ends[s])
-        if ans is not None and "<pad>" not in ans and "[SEP]" not in ans: return ans, texts[s]
-    return "unanswerable",texts[s]
+        if ans is not None and "<pad>" not in ans and "[SEP]" not in ans:
+            section = re.sub("\s+"," ",texts[s])
+            section = section.replace("’","")
+            return ans, section
+    return "Sorry! An answer could not be found but maybe this will help:",texts[s]
