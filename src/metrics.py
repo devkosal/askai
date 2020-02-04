@@ -1,19 +1,47 @@
 import torch
+import numpy as np
+import collections
 def accuracy(out, yb): return (torch.argmax(out, dim=1)==yb).float().mean()
 
-# https://github.com/fastai/course-v3/blob/master/nbs/dl2/12a_awd_lstm.ipynb
-def accuracy_flat(input, target):
-    bs,sl = target.size()
-    return accuracy(input.view(bs * sl, -1), target.view(bs * sl))   
+# defining the evaluation metrics based on squad evaluation methods
+def acc_qa(input,target,xb):
+    """
+    Taking the average between the accuracies of predicting the start and ending indices
+    """
+    return (accuracy(input[0], target[0][:,0]) + accuracy(input[1], target[0][:,1]))/2.0
 
+def acc_pos(input,target,xb):
+    return accuracy(input[2], target[1])
 
-from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+def exact_match(input,target,xb):
+    def _acc(out, yb): return (torch.argmax(out, dim=1)==yb).float()
+    return (_acc(input[0], target[0][:,0]) + _acc(input[1], target[0][:,1]) == 2).float().mean()
 
-cc = SmoothingFunction() # not sure what exactly this does
-def bleu(input, target):
-    inp = torch.argmax(F.softmax(input,dim=-1),dim=-1)
-    def _proc_one(cand, ref): # process one
-        ref = [ref.tolist()]
-        cand = cand.tolist()
-        return sentence_bleu(ref, cand, smoothing_function=cc.method1)
-    return torch.tensor([_proc_one(inp[i],target[i]) for i in range(len(input))]).float().mean()
+def f1_score(input,target,xb):
+    """
+    based on the official evaluation script:
+    https://worksheets.codalab.org/rest/bundles/0x6b567e1cf2e041ec80d7098f031c5c9e/contents/blob/
+    """
+    inp = [t.clone().detach() for t in input]
+    targ = [t.clone().detach() for t in target]
+    pred_starts,pred_ends = [torch.argmax(out, dim=1) for out in input[:2]]
+    gold_starts,gold_ends = targ[0][:,0], targ[0][:,1]
+
+    def _get_toks(idx,start,end):
+        if start == end: end += 1
+        return xb.clone().detach()[idx][start:end]
+
+    def _score1(pred_toks,gold_toks):
+        common = collections.Counter(gold_toks.tolist()) & collections.Counter(pred_toks.tolist())
+        num_same = sum(common.values())
+        if num_same == 0:
+            return 0
+        precision = 1.0 * num_same / len(pred_toks)
+        recall = 1.0 * num_same / len(gold_toks)
+        f1 = (2 * precision * recall) / (precision + recall)
+        return f1
+
+    pred_toks = [_get_toks(i,start,end) for i,(start,end) in enumerate(zip(pred_starts,pred_ends))]
+    gold_toks = [_get_toks(i,start,end) for i,(start,end) in enumerate(zip(gold_starts,gold_ends))]
+    score = np.mean([_score1(pred,gold) for pred,gold in zip(pred_toks,gold_toks)])
+    return score

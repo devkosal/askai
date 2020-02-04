@@ -1,8 +1,9 @@
-import torch 
+import torch
 from torch import tensor
 from .utils import *
 from .callbacks import *
 from .optimizers import *
+from tqdm import tqdm
 
 def normalize(x, m, s): return (x-m)/s
 
@@ -10,19 +11,10 @@ def normalize_to(train, valid):
     m,s = train.mean(),train.std()
     return normalize(train, m, s), normalize(valid, m, s)
 
-# for images
-    # https://github.com/fastai/course-v3/blob/master/nbs/dl2/08_data_block.ipynb
-def normalize_chan(x, mean, std):
-    return (x-mean[...,None,None]) / std[...,None,None]
-
-def test(a,b,cmp,cname=None):
-    if cname is None: cname=cmp.__name__
-    assert cmp(a,b),f"{cname}:\n{a}\n{b}"
-    
 def near(a,b): return torch.allclose(a, b, rtol=1e-3, atol=1e-5)
 def test_near(a,b): test(a,b,near)
 
-# Learner    
+# Learner
 def param_getter(m): return m.parameters()
 
 class Learner():
@@ -30,7 +22,7 @@ class Learner():
                  cbs=None, cb_funcs=None):
         self.model,self.data,self.loss_func,self.opt_func,self.lr,self.splitter = model,data,loss_func,opt_func,lr,splitter
         self.in_train,self.logger,self.opt = False,print,None
-        
+
         # NB: Things marked "NEW" are covered in lesson 12
         # NEW: avoid need for set_runner
         self.cbs = []
@@ -40,7 +32,7 @@ class Learner():
 
     def add_cbs(self, cbs):
         for cb in listify(cbs): self.add_cb(cb)
-            
+
     def add_cb(self, cb):
         cb.set_runner(self)
         setattr(self, cb.name, cb)
@@ -48,7 +40,7 @@ class Learner():
 
     def remove_cbs(self, cbs):
         for cb in listify(cbs): self.cbs.remove(cb)
-            
+
     def one_batch(self, i, xb, yb):
         try:
             self.iter = i
@@ -61,7 +53,7 @@ class Learner():
             self.opt.zero_grad()
         except CancelBatchException:                        self('after_cancel_batch')
         finally:                                            self('after_batch')
-    
+
     def all_batches(self):
         self.iters = len(self.dl)
         try:
@@ -81,17 +73,17 @@ class Learner():
         self.add_cbs(cbs)
         # NEW: create optimizer on fit(), optionally replacing existing
         if reset_opt or not self.opt: self.opt = self.opt_func(self.splitter(self.model), lr=self.lr)
-            
+
         try:
             self.do_begin_fit(epochs)
             for epoch in range(epochs):
                 if not self.do_begin_epoch(epoch): self.all_batches()
 
-                with torch.no_grad(): 
+                with torch.no_grad():
                     self.dl = self.data.valid_dl
                     if not self('begin_validate'): self.all_batches()
                 self('after_epoch')
-            
+
         except CancelTrainException: self('after_cancel_train')
         finally:
             self('after_fit')
@@ -101,9 +93,32 @@ class Learner():
         'after_cancel_batch', 'after_batch', 'after_cancel_epoch', 'begin_fit',
         'begin_epoch', 'begin_validate', 'after_epoch',
         'after_cancel_train', 'after_fit'}
-    
+
     def __call__(self, cb_name):
         res = False
         assert cb_name in self.ALL_CBS
         for cb in sorted(self.cbs, key=lambda x: x._order): res = cb(cb_name) and res
-        return res  
+        return res
+
+    def get_raw_preds(self, dataset="valid",return_x=False):
+        self("begin_epoch")
+        with torch.no_grad():
+            if dataset == "valid" :
+                self.dl = self.data.valid_dl
+            elif dataset == "train":
+                self.dl = self.data.train_dl
+            else:
+                raise ValueError(f"{dataset} is not a valid dataset. Please enter either 'train' or 'valid'")
+            yps = []
+            ybs = []
+            if return_x: xbs = []
+            for i,(xb,yb) in enumerate(tqdm(self.dl)):
+                self.iter = i
+                self.xb,learner.yb = xb,yb
+                self('begin_batch')
+                ybs.append(yb)
+                yps.append(self.model(self.xb))
+                if return_x: xbs.append(xb)
+        outputs = (yps, ybs,)
+        if return_x: outputs += (xbs,)
+        return outputs
