@@ -72,9 +72,11 @@ class AvgStats():
         self.tot_mets = [0.] * len(self.metrics)
 
     @property
-    def all_stats(self): return [self.tot_loss.item()] + self.tot_mets
+    def all_stats(self): return [self.tot_loss.item()] + self.tot_mets # removed .item() from tot_loss due to error 
     @property
-    def avg_stats(self): return [o/self.count for o in self.all_stats]
+    def avg_stats(self): 
+#         if self.count == 0: count += 1e-12 # added due to error
+        return [o/self.count for o in self.all_stats]
 
     def __repr__(self):
         if not self.count: return ""
@@ -261,10 +263,11 @@ class GradientClipping(Callback):
 # For QA task:
 
 class SaveModelCallback(Callback):
-    def __init__(self,save_model_func,output_dir):
+    def __init__(self,save_model_func,output_dir, *args, **kwargs):
         self.output_dir, self.save_model_func = output_dir,save_model_func
+        self.args,self.kwargs = args, kwargs
     def after_epoch(self):
-        self.save_model_func(self, self.output_dir)
+        self.save_model_func(self, self.output_dir, *self.args, **self.kwargs)
 
 class CudaCallbackMTL(Callback):
     def begin_fit(self): self.model.cuda()

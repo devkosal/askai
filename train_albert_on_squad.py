@@ -29,8 +29,8 @@ def load_dfs(config):
 
     # reduce df sizes if testing
     if config.testing:
-        train = train[:int(len(train)/1000)]
-        valid = valid[:int(len(valid)/1000)]
+        train = train[:int(len(train)/config.data_reduction)]
+        valid = valid[:int(len(valid)/config.data_reduction)]
 
     return remove_max_sl(train, config.max_seq_len), remove_max_sl(valid, config.max_seq_len)
 
@@ -70,36 +70,21 @@ def make_dataloaders(config, train_df, valid_df):
 
     return DataBunch(train_dl,valid_dl)
 
-def get_learner(config):
-    model = AlbertForQuestionAnsweringMTL(config)
-
-    # setting up callbacks
-    cbfs = [partial(QAAvgStatsCallback,[acc_qa,acc_pos,exact_match,f1_score]),
-            ProgressCallback,
-            Recorder]
-    if torch.cuda.is_available(): cbfs.append(CudaCallbackMTL)
-    if not config.testing and config.save_checkpoint:
-        cbfs.append(partial(SaveModelCallback,save_model_qa,config.output_dir,config.model,config.squad_version))
-    if config.effective_bs and config.bs != config.effective_bs:
-        cbfs.append(partial(GradientAccumulation,config.bs,config.effective_bs))
-    if config.stats_update_freq is not None: cbfs.append(partial(TrainStatsCallback,config.stats_update_freq))
-
-    learn = Learner(model, data, cross_entropy_qa_mtl,lr=config.max_lr,cb_funcs=cbfs,splitter=albert_splitter,\
-                opt_func=config.opt_func)
-    return learn
-
 def get_learner(config, data, opt_func):
-    model = AlbertForQuestionAnsweringMTL.from_pretrained(config.weights)
+    model = AlbertForQuestionAnsweringMTL.from_pretrained(config.weights) if config.load_checkpoint else AlbertForQuestionAnsweringMTL(config)
 
     # setting up callbacks
     cbfs = [partial(QAAvgStatsCallback,[acc_qa,acc_pos,exact_match,f1_score]),
             ProgressCallback,
             Recorder]
     if torch.cuda.is_available(): cbfs.append(CudaCallbackMTL)
+
     if not config.testing and config.save_checkpoint:
         cbfs.append(partial(SaveModelCallback,save_model_qa,config.output_dir,config.model,config.squad_version))
+
     if config.effective_bs and config.bs != config.effective_bs:
         cbfs.append(partial(GradientAccumulation,config.bs,config.effective_bs))
+
     if config.stats_update_freq is not None: cbfs.append(partial(TrainStatsCallback,config.stats_update_freq))
 
     learn = Learner(model, data, cross_entropy_qa_mtl,lr=config.max_lr,cb_funcs=cbfs,splitter=albert_splitter,\
@@ -109,11 +94,15 @@ def get_learner(config, data, opt_func):
 def main(config):
     if isinstance(config, str): config = Config(**json.load(open(config,"r")))
     assert type(config) == Config, f"config parameter type must be Config or a path to a json file"
+    if config.effective_bs:
+        assert config.effective_bs >= config.bs, f"mini bs ({config.bs}) cannot be smaller than effective bs ({config.effective_bs})"
+        assert config.effective_bs % config.bs == 0, "mini bs ({config.bs}) should be a factor of the effective bs ({config.effective_bs})"
+
     model_name = re.findall(r"(.+?)-",config.model)[0]
     weights = config.output_dir+f"/{config.load_checkpoint}" if config.load_checkpoint else config.model
     r = requests.get(f"https://s3.amazonaws.com/models.huggingface.co/bert/{config.model}-config.json")
-    config = PretrainedConfig(**config,**r.json(),model_name=model_name,weights=weights)
-
+    config = PretrainedConfig(**config,**r.json(),weights=weights)
+    config.model_name=model_name
     train,valid = load_dfs(config)
     data = make_dataloaders(config, train, valid)
 

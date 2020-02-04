@@ -6,6 +6,7 @@ from torch import nn
 from pathlib import Path
 import re
 from datetime import datetime
+import os
 
 class CancelTrainException(Exception): pass
 class CancelEpochException(Exception): pass
@@ -189,14 +190,13 @@ def set_segments(x,sep_idx):
 def assert_no_negs(tensor):
     assert torch.all(torch.eq(tensor, abs(tensor)))
 
-def save_model_qa(learner,output_dir: Path, model, squad_version):
+def save_model_qa(learner, output_dir: Path, model_name, version):
+    output_dir = Path(output_dir)
     def _create_dir(dirc):
         if not os.path.exists(dirc): os.mkdir(dirc)
     epoch = learner.epoch
     metric = round(float(learner.qa_avg_stats.valid_stats.avg_stats[1]),2)
     _create_dir(output_dir)
-    model_dir = f"{re.sub(r'[ :]+','_',str(datetime.now()))}-{config.model}-acc-{metric}-ep-{epoch}-squad_{config.squad_version}"
+    model_dir = f"{re.sub(r'[ :]+','_',str(datetime.now()))}-{model_name}-acc-{metric}-ep-{epoch}-squad_{version}"
     _create_dir(output_dir/model_dir)
-    st = learner.model.state_dict()
-    logging.info(f"saving model in {output_dir/model_dir}")
-    torch.save(st,output_dir/model_dir/"weights.bin")
+    learner.model.save_pretrained(output_dir/model_dir)

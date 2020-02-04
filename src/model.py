@@ -103,13 +103,13 @@ class AlbertForQuestionAnsweringMTL(AlbertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
         self.config = config
-        self.bert = AlbertForQuestionAnswering(config)
+        self.bert = AlbertForQuestionAnswering(config) if config.load_checkpoint else AlbertForQuestionAnswering.from_pretrained(config.model)
         self.bert.train()
-        self.poss_drop = nn.Dropout(config.clas_dropout_prob)
-        self.poss = nn.Linear(config.hidden_size,config.num_labels_clas)
+        self.poss_drop = nn.Dropout(.1)
+        self.poss = nn.Linear(config.hidden_size,config.num_labels)
 
     def forward(self, input_ids, token_type_ids=None, attention_mask=None, labels=None):
-        token_type_ids = set_segments(input_ids,self.config.sep_idx)
+        token_type_ids = set_segments(input_ids,sep_idx=3)
         outputs = self.bert(input_ids,token_type_ids=token_type_ids)
         poss_outputs = self.poss_drop(self.poss(outputs[2]))
         return outputs[:2] + (poss_outputs,)
