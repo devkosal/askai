@@ -28,14 +28,14 @@ In this module, we train Albert on the [SQuAD 2.0](https://rajpurkar.github.io/S
 
 1. Parse the json files to create csv files 
 
-These will be easier for our dataloaders to read. Use the following script (`output dir` should contain the train and dev json files from SQuAD) 
+These will be easier for our dataloaders to read. Use the following script (`output dir` should contain the train and dev json files from SQuAD):
 
 `python squad_parser.py path/to/json/dir path/to/output/dir`
 
 
 2. Set the model configuration
 
-Model confgurations are used to set parameters and options for training, including data path directory. For examples and a full description of the options, read the [configs readme](https://github.com/devkosal/askai/configs/README.md).
+Mmodel confgurations are used to set parameters and options for training, including data path directory. For examples and a full description of the options, read the [configs readme](https://github.com/devkosal/askai/configs/README.md).
 
 3. Execute the training command:
 
@@ -43,7 +43,7 @@ Model confgurations are used to set parameters and options for training, includi
 
 For example: `python scripts/train_albert_on_squad.py configs/modeling-base.json`
 
-Model weights ```pytorch_model.bin```and config ```config.json``` will be stored in the `output_path` directory as in the configuration.
+After training, model weights ```pytorch_model.bin```and config ```config.json``` will be stored in the `output_path` directory as in the configuration.
 
 ## Demo
 
