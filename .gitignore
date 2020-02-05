@@ -7,3 +7,6 @@
 *.log
 models/
 .DS_Store
+dist/
+build/
+askai/
