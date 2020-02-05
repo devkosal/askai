@@ -17,4 +17,4 @@ ADD . ./albert-qa
 WORKDIR albert-qa/
 
 # CMD is used to set the command which will be run when the container starts
-CMD ["panel", "serve", "askai_app.py" ,"--port=5006","--allow-websocket-origin=3.213.106.226", "--allow-websocket-origin=textbookqa.com","--allow-websocket-origin=www.textbookqa.com","--args=intro_to_nutrition"]
+CMD ["panel", "serve", "askai_app.py" ,"--port=5006","--allow-websocket-origin=3.213.106.226", "--allow-websocket-origin=textbookqa.com","--allow-websocket-origin=www.textbookqa.com","--args=health_education"]

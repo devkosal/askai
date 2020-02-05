@@ -26,10 +26,9 @@ import sys
 
 try:
     get_ipython
-    example = "intro_to_nutrition" # default
+    example = "health_education" # default
 except:
-    example = "intro_to_nutrition" if len(sys.argv) < 2 else sys.argv[1]
-
+    example = "health_education" if len(sys.argv) < 2 else sys.argv[1]
 
 config = Config(
     model = "albert-base-v2",
@@ -39,8 +38,9 @@ config = Config(
 )
 
 
-tok = AutoTokenizer.from_pretrained(config.model)
 model = AlbertForQuestionAnsweringMTL.from_pretrained(config.weights) # ensure pytroch_model.bin and config files are saved in directory
+model.eval()
+tok = AutoTokenizer.from_pretrained(config.model)
 
 if config.sections_file_type == "db":
     # connecting to the DB
@@ -58,7 +58,7 @@ css = """ """ # use for custom css
 pn.extension(raw_css=[css])
 
 # creating the text input widget
-question = pn.widgets.TextInput(placeholder="input a health science related query here")
+question = pn.widgets.TextInput(name="Or enter your own question:", placeholder=f"Input a {config.book_name} related query here")
 
 question
 
@@ -66,6 +66,14 @@ question
 answer = pn.pane.Markdown("")
 section = pn.pane.Markdown("",width=600,background="yellow")
 section_spacer = pn.pane.Markdown("**Most Relevant Section:**")
+
+dropdown = pn.widgets.Select(name="Try a Sample Question:",options=config.sample_questions)
+dropdown.link(question, value="value")
+
+def update_option(event):
+    dropdown.value = dropdown.options[0]
+
+question.param.watch(update_option, "value")
 
 # create the button widget
 button = pn.widgets.Button(name="Submit",button_type="warning")
@@ -85,7 +93,7 @@ def click_cb(event):
 button.on_click(click_cb)
 
 # compiling our app with the objects we have created thus far
-app = pn.Column(pn.Column(question,button,answer,section_spacer,section))
+app = pn.Column(pn.Column(dropdown,question,button,answer,section_spacer,section))
 
 # Building the final app with a title, description, images etc.
 title_style = {"font-family":"impact"}

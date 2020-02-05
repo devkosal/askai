@@ -1,5 +1,18 @@
 {
     "book_name":"Health Education",
     "book_link":"https://drive.google.com/file/d/1hOf6wPNjeUvWflVIRwjbB7h-qMTMMp-G/view",
-    "sections_file_type": "db"
+    "sections_file_type": "db",
+    "sample_questions": [
+  "",
+  "What is health?",
+  "How many calories should be consumed?",
+  "What is cholesterol",
+  "What are the types of carbohydrates?",
+  "What are proteins?",
+  "How many carbs should be had?",
+  "What does the FDA regulate?",
+  "What is ptsd?",
+  "What causes ptsd?",
+  "What is borderline personality disorder?",
+  "What is bipolar disorder?"]
 }
