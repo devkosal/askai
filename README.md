@@ -19,6 +19,8 @@ and install requirements:
 
 ## Demo 
 
+![Demo](resources/demo.gif)
+
 
 
 ## Training ALBERT
