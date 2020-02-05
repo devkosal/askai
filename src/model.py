@@ -1,15 +1,19 @@
-from transformers import AlbertPreTrainedModel, AlbertModel
+from transformers import AlbertPreTrainedModel, AlbertModel, PretrainedConfig
 from torch import nn
 from .utils import set_segments
 
 # modified from https://github.com/huggingface/transformers/blob/master/src/transformers/modeling_albert.py
-class AlbertForQuestionAnswering(AlbertPreTrainedModel):
-    def __init__(self, config):
+class AlbertForQuestionAnsweringMTL(AlbertPreTrainedModel):
+    def __init__(self, config, askai_config=None):
         super().__init__(config)
+        if askai_config: config = PretrainedConfig(**config.__dict__,**askai_config)
+        self.config = config
         self.num_labels = config.num_labels
-
         self.albert = AlbertModel(config)
+
         self.qa_outputs = nn.Linear(config.hidden_size, config.num_labels)
+        self.poss_drop = nn.Dropout(config.clas_dropout_prob)
+        self.poss = nn.Linear(config.hidden_size,config.num_labels_clas)
 
         self.init_weights()
 
@@ -61,6 +65,7 @@ class AlbertForQuestionAnswering(AlbertPreTrainedModel):
         input_dict = tokenizer.encode_plus(question, text, return_tensors='pt')
         start_scores, end_scores = model(**input_dict)
         """
+        if token_type_ids is None: token_type_ids = set_segments(input_ids,sep_idx=self.config.sep_idx)
 
         outputs = self.albert(
             input_ids=input_ids,
@@ -78,7 +83,9 @@ class AlbertForQuestionAnswering(AlbertPreTrainedModel):
         start_logits = start_logits.squeeze(-1)
         end_logits = end_logits.squeeze(-1)
 
-        outputs = (start_logits, end_logits,) + outputs[2:]
+        poss_logits = self.poss_drop(self.poss(pooled_output))
+
+        outputs = (start_logits, end_logits, poss_logits) + outputs[2:]
         if start_positions is not None and end_positions is not None:
             # If we are on multi-GPU, split add a dimension
             if len(start_positions.size()) > 1:
@@ -96,20 +103,4 @@ class AlbertForQuestionAnswering(AlbertPreTrainedModel):
             total_loss = (start_loss + end_loss) / 2
             outputs = (total_loss,) + outputs
 
-        return outputs + (pooled_output,)  # (loss), start_logits, end_logits, (hidden_states), (attentions)
-
-# Custom MTL model
-class AlbertForQuestionAnsweringMTL(AlbertPreTrainedModel):
-    def __init__(self, config):
-        super().__init__(config)
-        self.config = config
-        self.bert = AlbertForQuestionAnswering(config) if config.load_checkpoint else AlbertForQuestionAnswering.from_pretrained(config.model)
-        self.bert.train()
-        self.poss_drop = nn.Dropout(.1)
-        self.poss = nn.Linear(config.hidden_size,config.num_labels)
-
-    def forward(self, input_ids, token_type_ids=None, attention_mask=None, labels=None):
-        token_type_ids = set_segments(input_ids,sep_idx=3)
-        outputs = self.bert(input_ids,token_type_ids=token_type_ids)
-        poss_outputs = self.poss_drop(self.poss(outputs[2]))
-        return outputs[:2] + (poss_outputs,)
+        return outputs  # (loss), start_logits, end_logits, poss_logits, (hidden_states), (attentions)

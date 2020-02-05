@@ -71,12 +71,16 @@ def make_dataloaders(config, train_df, valid_df):
     return DataBunch(train_dl,valid_dl)
 
 def get_learner(config, data, opt_func):
-    model = AlbertForQuestionAnsweringMTL.from_pretrained(config.weights) if config.load_checkpoint else AlbertForQuestionAnsweringMTL(config)
+    model_kwargs = {"pretrained_model_name_or_path": config.weights}
+
+    if not config.load_checkpoint: model_kwargs["askai_config"] = config
+    model = AlbertForQuestionAnsweringMTL.from_pretrained(**model_kwargs)
 
     # setting up callbacks
     cbfs = [partial(QAAvgStatsCallback,[acc_qa,acc_pos,exact_match,f1_score]),
             ProgressCallback,
             Recorder]
+
     if torch.cuda.is_available(): cbfs.append(CudaCallbackMTL)
 
     if not config.testing and config.save_checkpoint:
@@ -98,11 +102,9 @@ def main(config):
         assert config.effective_bs >= config.bs, f"mini bs ({config.bs}) cannot be smaller than effective bs ({config.effective_bs})"
         assert config.effective_bs % config.bs == 0, "mini bs ({config.bs}) should be a factor of the effective bs ({config.effective_bs})"
 
-    model_name = re.findall(r"(.+?)-",config.model)[0]
-    weights = config.output_dir+f"/{config.load_checkpoint}" if config.load_checkpoint else config.model
-    r = requests.get(f"https://s3.amazonaws.com/models.huggingface.co/bert/{config.model}-config.json")
-    config = PretrainedConfig(**config,**r.json(),weights=weights)
-    config.model_name=model_name
+    config.model_name=re.findall(r"(.+?)-",config.model)[0]
+    config.weights=config.output_dir+f"/{config.load_checkpoint}" if config.load_checkpoint else config.model
+
     train,valid = load_dfs(config)
     data = make_dataloaders(config, train, valid)
 
