@@ -33,7 +33,7 @@
     "sep_tok": "[SEP]",
     "squad_version": "2.0",
     "start_tok": "[CLS]",
-    "stats_update_freq": 0.1,
+    "stats_update_freq": 0.05,
     "task": "SQuAD",
     "testing": false,
     "unk_tok_idx": 1,

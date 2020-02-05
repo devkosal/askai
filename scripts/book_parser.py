@@ -63,7 +63,7 @@ def soup_chunker(input_html_file):
             current.append(text)
     return chunks
 
-def parser(input_html_file, output_dir=None, output_level = "section", max_seq_len=400, json_out=False):
+def parser(input_html_file, output_dir=None, output_level = "section", max_seq_len=400, jsonl=False):
     if output_dir is None: output_dir = Path(input_html_file).parent
     assert os.path.exists(output_dir), f"output_dir: {output_dir} does not exist"
     assert output_level in ["sentence","section"], "output_level must be sentence, paragrpah or section"

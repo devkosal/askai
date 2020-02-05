@@ -9,14 +9,12 @@ class AlbertForQuestionAnsweringMTL(AlbertPreTrainedModel):
         if askai_config: config = PretrainedConfig(**config.__dict__,**askai_config)
         self.config = config
         self.num_labels = config.num_labels
-        self.albert = AlbertModel(config)
+        self.albert = AlbertModel(config) if config.load_checkpoint else AlbertModel.from_pretrained(config.model)
         self.albert = nn.DataParallel(self.albert)
         self.qa_outputs = nn.Linear(config.hidden_size, config.num_labels)
         self.poss_drop = nn.Dropout(config.clas_dropout_prob)
         self.poss = nn.Linear(config.hidden_size,config.num_labels_clas)
-
-        self.init_weights()
-
+        
     def forward(
         self,
         input_ids=None,
