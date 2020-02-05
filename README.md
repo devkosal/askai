@@ -19,7 +19,9 @@ and install requirements:
 
 ## Demo 
 
-![Demo](resources/demo.gif)
+<p align="center">
+  <img width="640" height="756" src="resouces/demo.gif">
+</p>
 
 
 
