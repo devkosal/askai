@@ -10,7 +10,7 @@ class AlbertForQuestionAnsweringMTL(AlbertPreTrainedModel):
         self.config = config
         self.num_labels = config.num_labels
         self.albert = AlbertModel(config)
-
+        self.albert = nn.DataParallel(self.albert)
         self.qa_outputs = nn.Linear(config.hidden_size, config.num_labels)
         self.poss_drop = nn.Dropout(config.clas_dropout_prob)
         self.poss = nn.Linear(config.hidden_size,config.num_labels_clas)
