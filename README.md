@@ -19,6 +19,10 @@ and install requirements:
 
 ## Demo 
 
+<p align="center">
+  <img width="640" height="756" src="resouces/demo.gif"></img>
+</p>
+
 
 
 ## Training ALBERT
