@@ -1,6 +1,10 @@
 # askai
 Building a Question Answering system with [ALBERT](https://ai.googleblog.com/2019/12/albert-lite-bert-for-self-supervised.html) on SQuAD dataset for large documents, namely textbooks.
 
+<p align="center">
+  <img width="320" height="378" src="https://github.com/devkosal/askai/raw/master/resources/demo.gif"></img>
+</p>
+
 ## Overview
 Modern information retrieval techniques are successful in retrieving information from smaller documents. However, when it comes to larger documents, current options fall short. This repository attempts to solve the problem of performing Question Answering on large documents. This requires a two part approach. In one part, ALBERT is trained on the SQuAD QA dataset. In the other, we fragment a textbook into multiple sections using a rule based approach. We can then compare user question embeddings to the embeddings of the sections to find the most relevant section(s). 
 
@@ -15,13 +19,6 @@ To follow along with any section(s) below, clone this reposiroty:
 and install requirements:
 
 ```pip install -r requirements.txt```
-
-
-## Final Result 
-
-<p align="center">
-  <img width="640" height="756" src="https://github.com/devkosal/askai/raw/master/resources/demo.gif"></img>
-</p>
 
 
 
