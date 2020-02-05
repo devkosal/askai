@@ -17,10 +17,10 @@ and install requirements:
 ```pip install -r requirements.txt```
 
 
-## Demo 
+## Final Result 
 
 <p align="center">
-  <img width="640" height="756" src="resouces/demo.gif"></img>
+  <img width="640" height="756" src="https://github.com/devkosal/askai/raw/master/resources/demo.gif"></img>
 </p>
 
 
