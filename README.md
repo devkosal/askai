@@ -28,11 +28,10 @@ In this module, we train Albert on the [SQuAD 2.0](https://rajpurkar.github.io/S
 
 1. Parse the json files to create csv files 
 
-These will be easier for our dataloaders to read. Use the following script:
+These will be easier for our dataloaders to read. Use the following script (output dir should contain the train and dev json files from SQuAD) 
 
 `python squad_parser.py path/to/json/dir path/to/output/dir`
 
-`path/to/json/dir` should contain the train and dev json files from SQuAD. 
 
 2. Set the model configuration
 
