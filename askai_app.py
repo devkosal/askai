@@ -27,13 +27,22 @@ import sys
 try:
     get_ipython
     example = "health_education" # default
+    weights = weights
 except:
-    example = "health_education" if len(sys.argv) < 2 else sys.argv[1]
+    if len(sys.argv) < 2:
+        raise ValueError("please provide the directory to the model weights as the first\
+        argument in --args e.g. --args path/to/model/weights")
+    elif len(sys.argv) < 3:
+        weights = sys.argv[1]
+        example = "health_education" # default
+    elif len(sys.argv) == 3:
+        weights = sys.argv[1]
+        example = sys.argv[2]
 
 config = Config(
     model = "albert-base-v2",
-    weights = "models/2.0/base",
     pad_idx = 0,
+    weights = weights,
     **json.load(open(f'examples/{example}/book-config.json',"r"))
 )
 
@@ -59,8 +68,6 @@ pn.extension(raw_css=[css])
 
 # creating the text input widget
 question = pn.widgets.TextInput(name="Or enter your own question:", placeholder=f"Input a {config.book_name} related query here")
-
-question
 
 # creating the markdown text pane where generated text will go
 answer = pn.pane.Markdown("")
