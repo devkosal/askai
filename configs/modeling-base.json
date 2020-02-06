@@ -36,6 +36,6 @@
     "stats_update_freq": 0.05,
     "task": "SQuAD",
     "testing": false,
-    "unk_tok_idx": 1,
+    "unk_idx": 1,
     "use_fp16": false
 }

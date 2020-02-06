@@ -1,0 +1,6 @@
+version: '3'
+services:
+  askai:
+    image: 'askai'
+    ports:
+      - "5006:5006"
