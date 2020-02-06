@@ -10,3 +10,4 @@ models/
 dist/
 build/
 askai/
+.idea/
