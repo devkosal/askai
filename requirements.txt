@@ -3,9 +3,10 @@ transformers
 numpy
 pandas
 scikit-learn
-panel
+panel==0.7.0
 jupyter
 scipy
 tqdm
 matplotlib
 fastprogress
+fire
