@@ -1,8 +1,8 @@
-# askAi
+# AskAi
 Building a Question Answering system with [ALBERT](https://ai.googleblog.com/2019/12/albert-lite-bert-for-self-supervised.html) on SQuAD dataset for large documents, namely textbooks.
 
 <p align="center">
-  <a href="" ><img width="512" height="605" src="https://github.com/devkosal/askai/raw/master/resources/demo.gif"> </img></a>
+  <a href="#" ><img width="512" height="605" src="https://github.com/devkosal/askai/raw/master/resources/demo.gif"> </img></a>
 </p>
 
 ## Overview
