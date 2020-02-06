@@ -87,7 +87,7 @@ You can now use the trained weights to demo the application. Our app uses Pyviz'
 
 ## Building Custom Examples
 
-Two examples are provided by default under the ```examples``` directory. This module will cover the steps to create your own. Each example has the same directory structure:
+Two examples are provided by default under the `examples`(examples) directory. This module will cover the steps to create your own. Each example has the same directory structure:
 
 ```
 sections.csv (or sections.db)
