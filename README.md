@@ -153,3 +153,7 @@ docker run -p 5006:5006 --rm --name app  askai
 ```
 
 If you wish to deploy your own example, add `"--args=path/to/model_weights/, your_example_name"` option to the `CMD` line in `docker/Dockerfile`
+
+## Acknowledgments
+
+This project utilized teachings from [Fastai's Deep Learning Course](https://www.fast.ai/) and base architectures from [Huggingface's transformers](https://huggingface.co/transformers/). The books are from [University of Minnesota's Open Textbook Library](https://open.umn.edu/opentextbooks). 
