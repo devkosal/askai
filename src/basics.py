@@ -9,7 +9,7 @@ def normalize(x, m, s): return (x-m)/s
 
 def normalize_to(train, valid):
     """
-
+    normalizes train and valid input variables
     :param train: train data
     :param valid: valid data
     :return: normalized train and valid data to the train mean and std
