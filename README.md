@@ -156,4 +156,4 @@ If you wish to deploy your own example, add `"--args=path/to/model_weights/, you
 
 ## Acknowledgments
 
-This project utilized teachings from [Fastai's Deep Learning Course](https://www.fast.ai/) and base architectures from [Huggingface's transformers](https://huggingface.co/transformers/). The books are from [University of Minnesota's Open Textbook Library](https://open.umn.edu/opentextbooks). 
+This project utilized teachings from [Fastai's  Deep Learning from the Foundations Course](https://course.fast.ai/part2) and base architectures from [Huggingface's transformers](https://huggingface.co/transformers/). The books are from [University of Minnesota's Open Textbook Library](https://open.umn.edu/opentextbooks). 
