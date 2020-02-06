@@ -40,7 +40,7 @@ def make_dataloaders(config, train_df, valid_df):
     proc_tok = QATokenizerProcessor(tok.tokenize, config.max_seq_len, config.start_tok, config.end_tok)
 
     vocab = {tok.convert_ids_to_tokens(i):i for i in range(tok.vocab_size)}
-    proc_num = QANumericalizeProcessor(vocab, unk_tok_idx=config.unk_tok_idx)
+    proc_num = QANumericalizeProcessor(vocab, unk_tok_idx=config.unk_idx)
     proc_qa = QALabelProcessor(str2tensor,config.adjustment)
 
     if (not (os.path.exists(config.data_path+f"/squad_{config.squad_version}_data_trn.pkl"))) or config.recreate_ds or config.testing:
