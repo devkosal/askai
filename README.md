@@ -35,7 +35,7 @@ These will be easier for our dataloaders to read. Use the following script (`out
 
 2. Set the model configuration
 
-Mmodel confgurations are used to set parameters and options for training, including data path directory. For examples and a full description of the options, read the [configs readme](https://github.com/devkosal/askai/configs/README.md).
+Mmodel confgurations are used to set parameters and options for training, including data path directory. For examples and a full description of the options, read the [configs readme](https://github.com/devkosal/askai/tree/master/configs).
 
 3. Execute the training command:
 
