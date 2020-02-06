@@ -17,6 +17,11 @@ from src import *
 import fire
 
 def load_dfs(config):
+    """
+    - loads train and valid csv files, coverts them into dataframes
+    - truncates the dataset if testing
+    - drops those which exceed maximum allowed sequence length
+    """
     train = pd.read_csv(config.data_path+f"/train_{config.squad_version}_{config.model_name}.csv")
     valid = pd.read_csv(config.data_path+f"/val_{config.squad_version}_{config.model_name}.csv")
 
@@ -35,6 +40,10 @@ def load_dfs(config):
     return remove_max_sl(train, config.max_seq_len), remove_max_sl(valid, config.max_seq_len)
 
 def make_dataloaders(config, train_df, valid_df):
+    """
+    - preprocesses raw text input into numericalized tensors
+    - creates train and valid dataloaders out of dataframes
+    """
     tok = AutoTokenizer.from_pretrained(config.model)
 
     proc_tok = QATokenizerProcessor(tok.tokenize, config.max_seq_len, config.start_tok, config.end_tok)
@@ -71,6 +80,10 @@ def make_dataloaders(config, train_df, valid_df):
     return DataBunch(train_dl,valid_dl)
 
 def get_learner(config, data, opt_func):
+    """
+    - defines the model and relevant callbacks
+    - creates learner object used to train the model
+    """
     model_kwargs = {"pretrained_model_name_or_path": config.weights}
 
     if not config.load_checkpoint: model_kwargs["askai_config"] = config
@@ -96,6 +109,12 @@ def get_learner(config, data, opt_func):
     return learn
 
 def main(config):
+    """
+    - loads data
+    - sets the Learning Rate and Momentum Scheduler
+    - defines the optimizer
+    - trains and outputs results periodically
+    """
     if isinstance(config, str): config = Config(**json.load(open(config,"r")))
     assert type(config) == Config, f"config parameter type must be Config or a path to a json file"
     if config.effective_bs:

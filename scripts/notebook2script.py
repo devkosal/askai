@@ -1,5 +1,5 @@
 # modified from https://github.com/fastai/fastai_dev/blob/master/dev_nb/notebook2script.py
-# use tools/sync-nb-exports to autogenerate all relevant files automatically
+# converts notebooks to python script files. Any code cells with "#export" on top will be exported to script.
 
 import json, fire, re, os.path
 from pathlib import Path

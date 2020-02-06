@@ -6,6 +6,7 @@ def get_defaults(d): return getattr(d,'_defaults',{})
 
 # Optimizer Class
 class Optimizer():
+    """Base Optimizer Class for building SGD, ADAM and LAMB"""
     def __init__(self, params, steppers, **defaults):
         self.steppers = listify(steppers)
         maybe_update(self.steppers, defaults, get_defaults)
@@ -45,7 +46,6 @@ l2_reg._defaults = dict(wd=0.)
 #SGD
 sgd_opt = partial(Optimizer, steppers=[weight_decay, sgd_step])
 
-
 # stateful optimizer
 # https://github.com/fastai/course-v3/blob/master/nbs/dl2/09_optimizers.ipynb
 def maybe_update(os, dest, f):
@@ -54,6 +54,7 @@ def maybe_update(os, dest, f):
             if k not in dest: dest[k] = v
 
 class StatefulOptimizer(Optimizer):
+    """Builds on Optimizer by maintaining a state of gradient stats over time. This is important for techniques such as momentum, RMSprop"""
     def __init__(self, params, steppers, stats=None, **defaults):
         self.stats = listify(stats)
         maybe_update(self.stats, defaults, get_defaults)
@@ -128,6 +129,10 @@ def adam_opt(xtra_step=None, **kwargs):
                    stats=[AverageGrad(dampening=True), AverageSqrGrad(), StepCount()], **kwargs)
 
 def lamb_step(p, lr, mom, mom_damp, step, sqr_mom, sqr_damp, grad_avg, sqr_avg, eps, wd, **kwargs):
+    """ 
+    Implementtion of LAMB optimizer step which takes the ratio of weights norm to gradients norm.
+    This ratio is multiplied to the LR to slow or speed up updates based on how well general model performance.
+    """
     debias1 = debias(mom,     mom_damp, step)
     debias2 = debias(sqr_mom, sqr_damp, step)
     r1 = p.data.pow(2).mean().sqrt()

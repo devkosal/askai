@@ -2,6 +2,7 @@ from torch import nn
 import torch.functional as F
 
 class GeneralRelu(nn.Module):
+    """Customizable Relu module"""
     def __init__(self, leak=None, sub=None, maxv=None):
         super().__init__()
         self.leak,self.sub,self.maxv = leak,sub,maxv

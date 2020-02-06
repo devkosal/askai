@@ -16,10 +16,17 @@ import logging
 _camel_re1 = re.compile('(.)([A-Z][a-z]+)')
 _camel_re2 = re.compile('([a-z0-9])([A-Z])')
 def camel2snake(name):
+    """
+    used to name callbacks as objects for the learner
+    CamelCase -> camel_case
+    :param name: class name in CamelCase
+    :return: same name in camel_case
+    """
     s1 = re.sub(_camel_re1, r'\1_\2', name)
     return re.sub(_camel_re2, r'\1_\2', s1).lower()
 
 class Callback():
+    """base Callback class for building Learner callbacks"""
     _order=0
     def set_runner(self, run): self.run=run
     def __getattr__(self, k): return getattr(self.run, k)
@@ -35,6 +42,7 @@ class Callback():
         return False
 
 class TrainEvalCallback(Callback):
+    """Training callback. Highly recommended to be part of any learner object"""
     def begin_fit(self):
         self.run.n_epochs=0.
         self.run.n_iter=0
@@ -61,10 +69,12 @@ class TestCallback(Callback):
 
 
 class CudaCallback(Callback):
+    """Sets objects to cuda. Use if training on GPU"""
     def begin_fit(self): self.model.cuda()
     def begin_batch(self): self.run.xb, self.run.yb = self.xb.cuda(), self.yb.cuda()
 
 class AvgStats():
+    """Wrapper for metrics used in AvgStatsCallback"""
     def __init__(self, metrics, in_train): self.metrics,self.in_train = listify(metrics),in_train
 
     def reset(self):
@@ -89,6 +99,7 @@ class AvgStats():
             self.tot_mets[i] += m(run.pred, run.yb) * bn
 
 class AvgStatsCallback(Callback):
+    """Stats Tracker Callback"""
     _order=1
     def __init__(self, metrics):
         self.train_stats,self.valid_stats = AvgStats(metrics,True),AvgStats(metrics,False)
@@ -117,6 +128,7 @@ class AvgStatsCallback(Callback):
 
 # For progress bar: https://github.com/fastai/course-v3/blob/master/nbs/dl2/09c_add_progress_bar.ipynb
 class ProgressCallback(Callback):
+    """Progress Bar callback which uses fastprogress"""
     _order=-1
     def begin_fit(self):
         self.mbar = master_bar(range(self.epochs))
@@ -135,12 +147,13 @@ class ProgressCallback(Callback):
 
 # https://github.com/fastai/course-v3/blob/master/nbs/dl2/06_cuda_cnn_hooks_init.ipynb
 class BatchTransformXCallback(Callback):
+    """applies batch transformations to x prior to the start of every batch"""
     _order=2
     def __init__(self, tfm): self.tfm = tfm
     def begin_batch(self): self.run.xb = self.tfm(self.xb)
 
-# dev
 class BatchTransformXYCallback(Callback):
+    """applies batch transformations to x and y prior to the start of every batch"""
     _order=2
     def __init__(self, tfm): self.tfm = tfm
     def begin_batch(self): self.run.xb,self.run.yb = self.tfm(self.xb,self.yb)
@@ -148,6 +161,7 @@ class BatchTransformXYCallback(Callback):
 
 # https://github.com/fastai/course-v3/blob/master/nbs/dl2/09_optimizers.ipynb
 class Recorder(Callback):
+    """records loss and learning rate in the course of training"""
     def begin_fit(self): self.lrs,self.losses = [],[]
 
     def after_batch(self):
@@ -167,6 +181,7 @@ class Recorder(Callback):
 
 
 class ParamScheduler(Callback):
+    """schedules parameters such as learning rate and momentum"""
     _order=1
     def __init__(self, pname, sched_funcs):
         self.pname,self.sched_funcs = pname,listify(sched_funcs)
@@ -179,6 +194,7 @@ class ParamScheduler(Callback):
         for f,h in zip(fs,self.opt.hypers): h[self.pname] = f(pos)
 
 def annealer(f):
+    """decorator function which anneals a parameteter based on annealing type function e.g. cos, lin, exp"""
     def _inner(start, end): return partial(f, start, end)
     return _inner
 
@@ -197,9 +213,22 @@ def sched_exp(start, end, pos): return start * (end/start) ** pos
 torch.Tensor.ndim = property(lambda x: len(x.shape))
 
 def cos_1cycle_anneal(start, high, end):
+    """
+    cosine annealer for a single epoch. all positions are between 0 and 1 defining the start and end of an epoch respectively
+    :param start: starting position
+    :param high:  position where LR peaks
+    :param end: ending position
+    :return: the relevant LR factor for each position
+    """
     return [sched_cos(start, high), sched_cos(high, end)]
 
 def combine_scheds(pcts, scheds):
+    """
+    combines different annealers
+    :param pcts: the percent to which the first scheduler is used.
+    :param scheds: the schedulers which correlate to each item in pcts
+    :return: returns the LR factor for a single position
+    """
     assert sum(pcts) == 1.
     pcts = tensor([0] + listify(pcts))
     assert torch.all(pcts >= 0)
@@ -210,13 +239,27 @@ def combine_scheds(pcts, scheds):
         return scheds[idx](actual_pos)
     return _inner
 
-# https://github.com/fastai/course-v3/blob/master/nbs/dl2/11_train_imagenette.ipynb
 def create_phases(phases):
+    """
+    simple phases generator to be passed into combine_scheds
+    https://github.com/fastai/course-v3/blob/master/nbs/dl2/11_train_imagenette.ipynb
+    :param phases: list of positive floats adding adding up to less than 1
+    :return: phases + the diff between 1 and sum of phases
+    """
     phases = listify(phases)
     return phases + [1-sum(phases)]
 
-# https://github.com/fastai/course-v3/blob/master/nbs/dl2/11a_transfer_learning.ipynb
 def sched_1cycle(lrs, pct_start=0.3, mom_start=0.95, mom_mid=0.85, mom_end=0.95):
+    """
+    Schedules the learning rate and momentum using a consine annealer for a single epoch
+    https://github.com/fastai/course-v3/blob/master/nbs/dl2/11a_transfer_learning.ipynb
+    :param lrs: learning rates for each phase
+    :param pct_start: warm up LR factor
+    :param mom_start: warm up momentum factor
+    :param mom_mid: mid momentum factor
+    :param mom_end: ending momentum factor
+    :return: ParamSchedulers for Learning Rate and Momentum
+    """
     phases = create_phases(pct_start)
     sched_lr  = [combine_scheds(phases, cos_1cycle_anneal(lr/10., lr, lr/1e5))
                  for lr in lrs]
@@ -227,6 +270,7 @@ def sched_1cycle(lrs, pct_start=0.3, mom_start=0.95, mom_mid=0.85, mom_end=0.95)
 # LR finder
 # https://github.com/fastai/course-v3/blob/master/nbs/dl2/09_optimizers.ipynb
 class LR_Find(Callback):
+    """ Learning Rate Finder which tries several learning rates over a smaller number of iterations"""
     _order=1
     def __init__(self, max_iter=100, min_lr=1e-6, max_lr=10):
         self.max_iter,self.min_lr,self.max_lr = max_iter,min_lr,max_lr
@@ -243,9 +287,13 @@ class LR_Find(Callback):
             raise CancelTrainException()
         if self.loss < self.best_loss: self.best_loss = self.loss
 
-# https://github.com/fastai/course-v3/blob/master/nbs/dl2/11a_transfer_learning.ipynb
-# you can repalce the __call__ function of any callback like here.
+
 class DebugCallback(Callback):
+    """
+    Used for debugging any stage of the learner object
+    https://github.com/fastai/course-v3/blob/master/nbs/dl2/11a_transfer_learning.ipynb
+    you can repalce the __call__ function of any callback like here.
+    """
     _order = 999
     def __init__(self, cb_name, f=None): self.cb_name,self.f = cb_name,f
     def __call__(self, cb_name):
@@ -253,15 +301,19 @@ class DebugCallback(Callback):
             if self.f: self.f(self.run)
             else:      set_trace()
 
-# https://github.com/fastai/course-v3/blob/master/nbs/dl2/12a_awd_lstm.ipynb
 class GradientClipping(Callback):
+    """
+    clips gradients based on clip
+    https://github.com/fastai/course-v3/blob/master/nbs/dl2/12a_awd_lstm.ipynb
+    """
     def __init__(self, clip=None): self.clip = clip
     def after_backward(self):
         if self.clip:  nn.utils.clip_grad_norm_(self.run.model.parameters(), self.clip)
 
-# For QA task:
-
 class SaveModelCallback(Callback):
+    """
+    Save Model Callback for storing checkpoint weights and config files. Requires a save_model function
+    """
     def __init__(self,save_model_func,output_dir, *args, **kwargs):
         self.output_dir, self.save_model_func = output_dir,save_model_func
         self.args,self.kwargs = args, kwargs
@@ -269,12 +321,13 @@ class SaveModelCallback(Callback):
         self.save_model_func(self, self.output_dir, *self.args, **self.kwargs)
 
 class CudaCallbackMTL(Callback):
+    """ Sets x and dual labels to cuda device"""
     def begin_fit(self): self.model.cuda()
     def begin_batch(self): self.run.xb, self.run.yb = \
         self.xb.cuda(), (self.run.yb[0].cuda(), self.run.yb[1].cuda())
 
-# gradient accumulation
 class GradientAccumulation(Callback):
+    """Used to accumulate gradients to simulate batch sizes on smaller GPUs. gradient accumulation steps = effective_bs/bs"""
     _order=2
     def __init__(self,bs,effective_bs):
         self.bs, self.effective_bs = bs, effective_bs
@@ -284,6 +337,7 @@ class GradientAccumulation(Callback):
         if self.n_iter*self.bs % self.effective_bs != 0: raise CancelBatchException()
 
 class QAAvgStats(AvgStats):
+    """ This object builds on AvgStats to pass in inputs to the evaluation metrics (as it is requried for F1 calculation) """
     def accumulate(self, run):
         bn = run.xb.shape[0]
         self.tot_loss += run.loss * bn
@@ -292,10 +346,12 @@ class QAAvgStats(AvgStats):
             self.tot_mets[i] += m(run.pred, run.yb, run.xb) * bn
 
 class QAAvgStatsCallback(AvgStatsCallback):
+    """Implements QAAvgStats within QAAvgStatsCallback"""
     def __init__(self, metrics):
         self.train_stats,self.valid_stats = QAAvgStats(metrics,True),QAAvgStats(metrics,False)
 
 class TrainStatsCallback(Callback):
+    """reports intermittent training stats based on update_freq_pct"""
     _order=5
     def __init__(self, update_freq_pct=.2):
         self.update_freq_pct = update_freq_pct

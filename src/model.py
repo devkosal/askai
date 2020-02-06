@@ -12,6 +12,8 @@ class AlbertForQuestionAnsweringMTL(AlbertPreTrainedModel):
         self.albert = AlbertModel(config) if config.load_checkpoint else AlbertModel.from_pretrained(config.model)
         self.albert = nn.DataParallel(self.albert)
         self.qa_outputs = nn.Linear(config.hidden_size, config.num_labels)
+
+        # classifier for is_impossible second label
         self.poss_drop = nn.Dropout(config.clas_dropout_prob)
         self.poss = nn.Linear(config.hidden_size,config.num_labels_clas)
         

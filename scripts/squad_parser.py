@@ -1,3 +1,5 @@
+# parses official SQuAD datasets from JSON files to CSV files
+
 import os, json, pandas as pd, fire, re, logging
 from pathlib import Path
 from transformers import AutoTokenizer
@@ -5,7 +7,12 @@ from tqdm import tqdm
 
 def squad_parser(directory, tok , data_set: str, squad_version: str = "2.0"):
     """
-    convert squad train and dev jsons to dfs. works for both 1.1 and 2.0 datasets
+    convert squad train and dev jsons to df. works for both 1.1 and 2.0 datasets
+    :param directory: input directory
+    :param tok: tokenizer function
+    :param data_set: either train or dev
+    :param squad_version: either 1.1 or 2.0
+    :return: dataframe
     """
     ver2 = squad_version == "2.0"
     ds_dir = data_set + f"-v{squad_version}.json"
@@ -39,6 +46,14 @@ def squad_parser(directory, tok , data_set: str, squad_version: str = "2.0"):
 
 
 def squad_json_to_csv(path_to_jsons_dir, path_to_csv_dir=None, model="albert-base-v2",squad_version="2.0"):
+    """
+    convert squad train and dev jsons to df. works for both 1.1 and 2.0 datasets
+    :param path_to_jsons_dir: path to directory containing json directories
+    :param path_to_csv_dir: path to directory to output csv files
+    :param model: model name for tokenizer e.g. 'albert-base-v2'
+    :param squad_version: either 1.1 or 2.0
+    :return: saves csv files in the path_to_csv_dir
+    """
     assert str(squad_version) in ["1.1", "2.0"], f"please enter a valid squad_version: 1.1 or 2.0, not {squad_version}"
     if path_to_csv_dir is None: path_to_csv_dir = path_to_jsons_dir
     tok = AutoTokenizer.from_pretrained(model)

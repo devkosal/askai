@@ -8,6 +8,12 @@ from tqdm import tqdm
 def normalize(x, m, s): return (x-m)/s
 
 def normalize_to(train, valid):
+    """
+
+    :param train: train data
+    :param valid: valid data
+    :return: normalized train and valid data to the train mean and std
+    """
     m,s = train.mean(),train.std()
     return normalize(train, m, s), normalize(valid, m, s)
 
@@ -20,6 +26,17 @@ def param_getter(m): return m.parameters()
 class Learner():
     def __init__(self, model, data, loss_func, opt_func=sgd_opt, lr=1e-2, splitter=param_getter,
                  cbs=None, cb_funcs=None):
+        """
+        Highly versatile, model agnostic object which performs training and inference.
+        :param model: pytorch model to be trained
+        :param data: databunch containing train dataloader and valid_dataloader
+        :param loss_func: loss function
+        :param opt_func: optimizer as a function. default: stochastic gradient descent
+        :param lr: maximum gloab learning rate
+        :param splitter: parameter splitter for discriminative learning rates.
+        :param cbs: callbacks as Callback classes
+        :param cb_funcs: callbacks as functions
+        """
         self.model,self.data,self.loss_func,self.opt_func,self.lr,self.splitter = model,data,loss_func,opt_func,lr,splitter
         self.in_train,self.logger,self.opt = False,print,None
 

@@ -6,6 +6,7 @@ assert ListContainer != None
 def children(m): return list(m.children())
 
 class Hook():
+    """base Hook class"""
     def __init__(self, m, f): self.hook = m.register_forward_hook(partial(f, self))
     def remove(self): self.hook.remove()
     def __del__(self): self.remove()
@@ -13,6 +14,7 @@ class Hook():
 from torch.nn import init
 
 class Hooks(ListContainer):
+    """Object used to generate stats"""
     def __init__(self, ms, f): super().__init__([Hook(m, f) for m in ms])
     def __enter__(self, *args): return self
     def __exit__ (self, *args): self.remove()
@@ -31,8 +33,12 @@ def append_stats(hook, mod, inp, outp):
     means.append(outp.data.mean())
     stds .append(outp.data.std())
     
-# https://github.com/fastai/course-v3/blob/master/nbs/dl2/11_train_imagenette.ipynb    
+
 def model_summary(learn, data, find_all=False, print_mod=False):
+    """
+    generates model summary with shapes using hooks
+    https://github.com/fastai/course-v3/blob/master/nbs/dl2/11_train_imagenette.ipynb
+    """
     model = learn.model
     xb,yb = get_batch(data.valid_dl, learn)
     mods = find_modules(model, is_lin_layer) if find_all else model.children()

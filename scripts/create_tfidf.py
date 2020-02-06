@@ -1,3 +1,5 @@
+# Creates TF IDF vectorizer and embeddings from csv or sqlite DB files
+
 import pandas as pd
 
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -12,6 +14,12 @@ import logging
 import fire
 
 def create_vectors(path_to_csv, output_dir=None):
+    """
+    stores vectorizer as a pickle file and tf-idf embeddings for relevant texts
+    :param path_to_csv: path to CSV file
+    :param output_dir: path to desired output directory. default is the path_to_csv
+    :return:
+    """
     if output_dir is None: output_dir = Path(path_to_csv).parent
     df = pd.read_csv(path_to_csv)
     lens = [len(i.split()) for i in df.text]

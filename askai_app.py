@@ -24,6 +24,8 @@ import re
 import json
 import sys
 
+
+# check whether we are in a jupyter notebook or a script and set args accordingly
 try:
     get_ipython
     example = "health_education" # default
@@ -39,6 +41,7 @@ except:
         weights = sys.argv[1]
         example = sys.argv[2]
 
+# setting and loading configuration variables
 config = Config(
     model = "albert-base-v2",
     pad_idx = 0,
@@ -47,10 +50,14 @@ config = Config(
 )
 
 
+
+# loading the model and tokenizer
 model = AlbertForQuestionAnsweringMTL.from_pretrained(config.weights) # ensure pytroch_model.bin and config files are saved in directory
 model.eval()
 tok = AutoTokenizer.from_pretrained(config.model)
 
+
+# determine the data type (whether csv or db)
 if config.sections_file_type == "db":
     # connecting to the DB
     con = sqlite3.connect(f'examples/{example}/sections.{config.sections_file_type}')
@@ -58,7 +65,7 @@ if config.sections_file_type == "db":
 elif config.sections_file_type == "csv":
     data = pd.read_csv(f'examples/{example}/sections.{config.sections_file_type}')
 
-# loading files
+# load vectors and vectorizer
 X = load_npz(f"examples/{example}/tfidf-vectors.npz")
 vectorizer = pickle.load(open(f"examples/{example}/vectorizer.pkl","rb"))
 
@@ -69,11 +76,13 @@ pn.extension(raw_css=[css])
 # creating the text input widget
 question = pn.widgets.TextInput(name="Or enter your own question:", placeholder=f"Input a {config.book_name} related query here")
 
-# creating the markdown text pane where generated text will go
+# creating the markdown answer, section panes
 answer = pn.pane.Markdown("")
 section = pn.pane.Markdown("",width=600,background="yellow")
 section_spacer = pn.pane.Markdown("**Most Relevant Section:**")
 
+
+# creating the dropdown options pane
 dropdown = pn.widgets.Select(name="Try a Sample Question:",options=config.sample_questions)
 dropdown.link(question, value="value")
 
@@ -85,16 +94,16 @@ question.param.watch(update_option, "value")
 # create the button widget
 button = pn.widgets.Button(name="Submit",button_type="warning")
 
-# writing the call back function when the generate_button is clicked
+# writing the call back function which will run when the generate_button is clicked
 def click_cb(event):
-    button.name, button.button_type = "Finding Answer...", "success" # change button to represent processing
-    scores = get_scores(question.value, vectorizer, X)
-    contexts = get_contexts(scores, data)
-    pred, best_section = get_pred(contexts, question.value, model, tok, config.pad_idx)
-    best_section = bold_answer(best_section, pred)
-    section.object = best_section
-    answer.object = pred
-    button.name, button.button_type = "Submit", "warning" # change button back
+    button.name, button.button_type, button.disabled = "Finding Answer...", "success", True # change button to represent processing
+    scores = get_scores(question.value, vectorizer, X) # get scored sections in descending order
+    contexts = get_contexts(scores, data) # get the most relevant sections' raw texts
+    pred, best_section = get_pred(contexts, question.value, model, tok, config.pad_idx) # get answer, most relevant text
+    best_section = bold_answer(best_section, pred) # bolding the answer within the section
+    section.object = best_section # update section pane's value
+    answer.object = pred # update answer pane's value
+    button.name, button.button_type, button.disabled = "Submit", "warning", False # change button back
 
 # linking the on_click acton with the click_cb function
 button.on_click(click_cb)

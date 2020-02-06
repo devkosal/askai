@@ -15,6 +15,7 @@ def parallel(func, arr, max_workers=4):
     if any([o is not None for o in results]): return results
 
 class QATokenizerProcessor(Processor):
+    """tokenizer processor for input text"""
     def __init__(self, tok_func, max_sl, start_tok, end_tok, pre_rules=None,post_rules=None):
         self.tok_func,self.max_sl = tok_func,max_sl
         self.pre_rules,self.post_rules=pre_rules,post_rules
@@ -26,6 +27,7 @@ class QATokenizerProcessor(Processor):
 
 class QANumericalizeProcessor(Processor):
     """
+    tokens to numeric ids processor
     only works with an existing vocab at the moment and min_freq is not accounted for
     """
     def __init__(self, vocab:dict, unk_tok_idx:int, min_freq=2):
@@ -39,6 +41,7 @@ class QANumericalizeProcessor(Processor):
         return tqdm([self.proc1(x) for x in items])
 
 class QALabelProcessor(Processor):
+    """creates index and is_impossible labels for QA MTL task"""
     def __init__(self, parse_func = noop, adjustment = 2):
         self.parse_func = parse_func
         self.adjustment = adjustment
@@ -57,12 +60,17 @@ class QALabelProcessor(Processor):
 from torch.utils.data import Sampler
 
 class SortSampler(Sampler):
+    """samples observations sorted by length to ensure batches contain similarly sized sequences"""
     def __init__(self, data_source, key): self.data_source,self.key = data_source,key
     def __len__(self): return len(self.data_source)
     def __iter__(self):
         return iter(sorted(list(range(len(self.data_source))), key=self.key, reverse=True))
 
 class SortishSampler(Sampler):
+    """
+    samples observations fuzzily sorted by length to ensure batches contain similarly sized sequence
+    useful for training dataloader to avoid modeling bias for a purely sorted dataloader
+    """
     def __init__(self, data_source, key, bs):
         self.data_source,self.key,self.bs = data_source,key,bs
 
@@ -81,6 +89,7 @@ class SortishSampler(Sampler):
         return iter(sorted_idx)
 
 def pad_collate(samples, pad_idx=1, pad_first=False):
+    """pads and collates input and labels into a single tensor"""
     max_len = max([len(s[0]) for s in samples])
     res = torch.zeros(len(samples), max_len).long() + pad_idx
     for i,s in enumerate(samples):
@@ -89,6 +98,7 @@ def pad_collate(samples, pad_idx=1, pad_first=False):
     return res, tensor([s[1] for s in samples])
 
 def pad_collate_qa(samples, pad_idx, pad_first=False):
+    """pads and collates inputs and labels for QA into a single tensor"""
     max_len = max([len(s[0]) for s in samples])
     res = torch.zeros(len(samples), max_len).long() + pad_idx
     for i,s in enumerate(samples):
@@ -99,6 +109,7 @@ def pad_collate_qa(samples, pad_idx, pad_first=False):
     return res, (qa_idxs, imp_labels)
 
 def pad_collate_x(samples, pad_idx, pad_first=False):
+    """pads and collates only inputs into a single tensor. useful for inference when labels don't exist"""
     max_len = max([len(s[0]) for s in samples])
     res = torch.zeros(len(samples), max_len).long() + pad_idx
     for i,s in enumerate(samples):

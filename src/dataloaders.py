@@ -4,11 +4,13 @@ from torch.utils.data import DataLoader, SequentialSampler, RandomSampler
 import random
 
 class Dataset():
+    """simple data structure for storing x and y values"""
     def __init__(self, x, y): self.x,self.y = x,y
     def __len__(self): return len(self.x)
     def __getitem__(self, i): return self.x[i],self.y[i]
 
 class DataBunch():
+    """Stores train and valid dataloaders"""
     def __init__(self, train_dl, valid_dl, c_in=None, c_out=None):
         self.train_dl,self.valid_dl,self.c_in,self.c_out = train_dl,valid_dl,c_in,c_out
 
@@ -20,11 +22,13 @@ class DataBunch():
 
 
 def get_dls(train_ds, valid_ds, bs, **kwargs):
+    """ transforms datasets into dataloaders"""
     return (DataLoader(train_ds, batch_size=bs, shuffle=True, **kwargs),
             DataLoader(valid_ds, batch_size=bs*2, **kwargs))
 
 
 class ItemList(ListContainer):
+    """Base item container which stores inputs and labels optionally"""
     def __init__(self, items, path='.', tfms=None, labels=None):
         super().__init__(items)
         self.path,self.tfms = Path(path),tfms
@@ -45,6 +49,7 @@ class ItemList(ListContainer):
         return self._get(res)
 
 def grandparent_splitter(fn, valid_name='valid', train_name='train'):
+    """splits items based on folder structure"""
     gp = fn.parent.parent.name
     return True if gp==valid_name else False if gp==train_name else None
 
@@ -52,15 +57,16 @@ def grandparent_splitter(fn, valid_name='valid', train_name='train'):
 def random_splitter(fn, p_valid): return random.random() < p_valid
 
 def split_by_func(items, f):
+    """ splits by specific function"""
     mask = [f(o) for o in items]
     # `None` values will be filtered out
-#     import pdb; pdb.set_trace()
     f = [o for o,m in zip(items,mask) if m==False]
     t = [o for o,m in zip(items,mask) if m==True ]
     return f,t
 
 
 class SplitData():
+    """data structure for storing post split data"""
     def __init__(self, train, valid): self.train,self.valid = train,valid
 
     def __getattr__(self,k): return getattr(self.train,k)
@@ -75,6 +81,7 @@ class SplitData():
     def __repr__(self): return f'{self.__class__.__name__}\nTrain: {self.train}\nValid: {self.valid}\n'
 
 def databunchify(sd, bs, c_in=None, c_out=None, **kwargs):
+    """converts datasets --> dataloaders --> databunch"""
     dls = get_dls(sd.train, sd.valid, bs, **kwargs)
     return DataBunch(*dls, c_in=c_in, c_out=c_out)
 
@@ -82,9 +89,11 @@ SplitData.to_databunch = databunchify
 
 
 class Processor():
+    """simple class to preprocess inputs and labels"""
     def process(self, items): return items
 
 class CategoryProcessor(Processor):
+    """label processor which creates a 'vocabulary' of uniques items in labels"""
     def __init__(self): self.vocab=None
 
     def __call__(self, items):
@@ -101,12 +110,16 @@ class CategoryProcessor(Processor):
     def deproc1(self, idx): return self.vocab[idx]
 
 
-def parent_labeler(fn): return fn.parent.name
+def parent_labeler(fn):
+    """sets labels based on parent folder e.g. train/df.csv"""
+    return fn.parent.name
 
-def _label_by_func(ds, f, cls=ItemList): return cls([f(o) for o in ds.items], path=ds.path)
+def _label_by_func(ds, f, cls=ItemList):
+    """label items based on function f"""
+    return cls([f(o) for o in ds.items], path=ds.path)
 
-#This is a slightly different from what was seen during the lesson,
 class LabeledData():
+    """post labelled data object which stores x and y pairs for each observation"""
     def process(self, il, proc): return il.new(compose(il.items, proc))
 
     # this is where the processors are run
@@ -149,6 +162,15 @@ to_float_tensor._order=30
 class SquadTextList(ItemList):
     @classmethod
     def from_df(cls, df, feat_cols, label_cols, sep_tok, test=False):
+        """
+        converts a dataframe into an ItemList
+        :param df: dataframe
+        :param feat_cols: feature columns
+        :param label_cols: label columns
+        :param sep_tok: the tok which separates question and answer sequences
+        :param test: whether the df is test or not, mainly to determine whether labels exist.
+        :return: Itemlist
+        """
         feat_cols = listify(feat_cols)
         x = df[feat_cols[0]]
         for i in range(1,len(feat_cols)):

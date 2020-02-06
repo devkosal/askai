@@ -1,4 +1,4 @@
-# textbook to json converter for drqa db and tfidf creator
+# html (textbook) to csv or json converter
 import os
 import textract
 from nltk import tokenize
@@ -13,6 +13,12 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 def splitter(string,final=[]):
+    """
+    splits a longer string into multiple smaller strings
+    :param string: string which requires splitting
+    :param final: intially empty final list of reduced strings
+    :return: final list
+    """
     split_string = string.split()
     split_len = len(split_string)
     if split_len < 300:
@@ -25,6 +31,12 @@ def splitter(string,final=[]):
     return final
 
 def sentence_chunker(book, max_seq_len):
+    """
+    breaks down a large document by sentences
+    :param book: html file
+    :param max_seq_len: max allowable sequence length
+    :return: list of sentence chunks
+    """
     raw_chunks = tokenize.sent_tokenize(book)
 
     chunks, rejects = [],0
@@ -46,6 +58,11 @@ def sentence_chunker(book, max_seq_len):
     return chunks
 
 def soup_chunker(input_html_file):
+    """
+    uses beautiful soup to divide input text based on <p> tags
+    :param input_html_file: input file
+    :return: list of section chunks
+    """
     soup = BeautifulSoup(open(input_html_file))
     for p in soup.find_all('p'):
         pass
@@ -64,6 +81,15 @@ def soup_chunker(input_html_file):
     return chunks
 
 def parser(input_html_file, output_dir=None, output_level = "section", max_seq_len=400, jsonl=False):
+    """
+    parses the input html file based on user selected options
+    :param input_html_file: input file
+    :param output_dir: save location for out out file. default is the same as input parent directory
+    :param output_level: type of chunking
+    :param max_seq_len: max allowed sequence length
+    :param jsonl: bool; whether the output should be jsonl. default is csv
+    :return: saves a csv file from the input files
+    """
     if output_dir is None: output_dir = Path(input_html_file).parent
     assert os.path.exists(output_dir), f"output_dir: {output_dir} does not exist"
     assert output_level in ["sentence","section"], "output_level must be sentence, paragrpah or section"

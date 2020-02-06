@@ -12,22 +12,28 @@ class CancelTrainException(Exception): pass
 class CancelEpochException(Exception): pass
 class CancelBatchException(Exception): pass
 
+
 def listify(o):
+    """convert object --> list"""
     if o is None: return []
     if isinstance(o, list): return o
     if isinstance(o, str): return [o]
     if isinstance(o, Iterable): return list(o)
     return [o]
 
+
 def setify(o): return o if isinstance(o,set) else set(listify(o))
 
+
 def uniqueify(x, sort=False):
+    """ returns only unique objects out of a list or similar data structure"""
     res = list(OrderedDict.fromkeys(x).keys())
     if sort: res.sort()
     return res
 
 
 class ListContainer():
+    """Comparable to lists with added functionality e.g. indexing with boolean """
     def __init__(self, items): self.items = listify(items)
     def __getitem__(self, idx):
         if isinstance(idx, (int,slice)): return self.items[idx]
@@ -49,8 +55,14 @@ class ListContainer():
 def get_batch(dl, *args,**kwargs):
     return next(iter(dl))
 
-# https://github.com/fastai/course-v3/blob/master/nbs/dl2/08_data_block.ipynb
 def compose(x, funcs, *args, order_key='_order', **kwargs):
+    """
+    simple functionla programming function to apply a list of functions to x and retunr the result
+    :param x: input
+    :param funcs: func or list of funcs
+    :param order_key: the order key by which to apply function
+    :return:
+    """
     key = lambda o: getattr(o, order_key, 0)
     for f in sorted(listify(funcs), key=key): x = f(x, **kwargs)
     return x
@@ -118,15 +130,19 @@ def adapt_model(learn, data): # adapts model to new dataset
         nn.Linear(ni*2, data.c_out))
     learn.model = m_new
 
-# https://github.com/fastai/course-v3/blob/master/nbs/dl2/11a_transfer_learning.ipynb
-# sets gradients for only batchnorm and linear layer which is the last layer I assume
+
 def set_grad(m, b):
+    """
+    https://github.com/fastai/course-v3/blob/master/nbs/dl2/11a_transfer_learning.ipynb
+    """
     if isinstance(m, (nn.Linear,nn.BatchNorm2d)): return
     if hasattr(m, 'weight'):
         for p in m.parameters(): p.requires_grad_(b)
 
 # Discriminative LRs
 # https://github.com/fastai/course-v3/blob/master/nbs/dl2/11a_transfer_learning.ipynb
+
+
 def bn_splitter(m): # batchnorm splitter
     def _bn_splitter(l, g1, g2):
         if isinstance(l, nn.BatchNorm2d): g2 += l.parameters()
@@ -139,10 +155,12 @@ def bn_splitter(m): # batchnorm splitter
     g2 += m[1:].parameters()
     return g1,g2
 
+
 def albert_splitter(m, g1=[],g2=[]):
+    """slits albert based on module names and types"""
     l = list(dict(m.named_children()).keys())
     if "qa_outputs" in  l: g2+= m.qa_outputs.parameters()
-    if "imp_outputs" in l: g2+= m.imp_outputs.parameters()
+    if "poss" in l: g2+= m.poss.parameters()
     if isinstance(m,torch.nn.modules.normalization.LayerNorm):
         g1+= m.parameters()
     elif hasattr(m, 'weight'):
@@ -151,8 +169,8 @@ def albert_splitter(m, g1=[],g2=[]):
     return g1,g2
 
 
-# Creating a config object to store task specific information
 class Config(dict):
+    """config object to store task specific information"""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         for k, v in kwargs.items():
@@ -165,18 +183,24 @@ class Config(dict):
     def save_to_json(self, output_file):
         json.dump(self.__dict__,open("output_file","w"),indent = 4, sort_keys=True)
 
+
 def remove_max_sl(df, max_seq_len):
+    """removes inputs which exceed maximum sequence length"""
     init_len = len(df)
     df = df[df.seq_len < max_seq_len-2]
     new_len = len(df)
     print(f"dropping {init_len - new_len} out of {init_len} questions which exceed max sequence length")
     return df
 
+
 def str2tensor(s):
+    """converts string based indices from csv into tensors"""
     indices = re.findall("-?\d+",s)
     return torch.tensor([int(indices[0]), int(indices[1])], dtype=torch.long)
 
+
 def set_segments(x,sep_idx):
+    """identifies token_type_ids for albert to determine which sequence a token belongs to."""
     res = x.new_zeros(x.size())
     for row_idx, row in enumerate(x):
         in_seg_1 = False
@@ -187,10 +211,21 @@ def set_segments(x,sep_idx):
                 res[row_idx,val_idx] = 1
     return res
 
+
 def assert_no_negs(tensor):
+    """usefule for asserting labels do not contain any negative values"""
     assert torch.all(torch.eq(tensor, abs(tensor)))
 
+
 def save_model_qa(learner, output_dir: Path, model_name, version):
+    """
+    used with SaveModelCallback and functool's partial to set model save details
+    :param learner: learner object
+    :param output_dir: dir where weights will be stored
+    :param model_name:
+    :param version:
+    :return:
+    """
     output_dir = Path(output_dir)
     def _create_dir(dirc):
         if not os.path.exists(dirc): os.mkdir(dirc)
