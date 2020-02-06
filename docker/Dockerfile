@@ -10,7 +10,7 @@ RUN apt-get update; \
      python3 get-pip.py ; \
      pip3 install torch numpy
 
-RUN pip3 install torch transformers numpy pandas scikit-learn panel jupyter scipy
+RUN pip3 install torch transformers numpy pandas==0.7.0 scikit-learn panel jupyter scipy
 
 ADD . ./askai
 
