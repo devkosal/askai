@@ -400,7 +400,7 @@ class TrainStatsCallback(Callback):
         if self.n_iter % self.update_freq == 0:
             metric_names = ["loss"] + [m.__name__ for m in self.qa_avg_stats.train_stats.metrics]
             stats = self.qa_avg_stats.train_stats.avg_stats
-            named_stats = {"loss": round(stats[0],5)}
+            named_stats = {"loss": round(stats[0],4)}
             for (n,st) in zip(metric_names[1:],stats[1:]):
                 named_stats[n] = round(st.item(),5)
 
