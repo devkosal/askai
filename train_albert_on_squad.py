@@ -104,11 +104,11 @@ def get_learner(config, data, opt_func):
 
     if config.stats_update_freq is not None: cbfs.append(partial(TrainStatsCallback,config.stats_update_freq))
 
-    learn = Learner(model, data, cross_entropy_qa_mtl,lr=config.max_lr,cb_funcs=cbfs,splitter=albert_splitter,\
+    learn = Learner(model, data, cross_entropy_qa_mtl_wtd,lr=config.max_lr,cb_funcs=cbfs,splitter=albert_splitter,\
                 opt_func=opt_func)
     return learn
 
-def main(config):
+def main(config, return_learner=False):
     """
     - loads data
     - sets the Learning Rate and Momentum Scheduler
@@ -135,7 +135,8 @@ def main(config):
     opt_func = lamb_opt() if config.optimizer.lower() == "lamb" else adam_opt()
 
     learn = get_learner(config, data, opt_func)
-    learn.fit(config.epochs,cbs=disc_lr_sched)
+    learn.fit(config.epochs)#,cbs=disc_lr_sched)
+    if return_learner: return learn
 
 if __name__ == "__main__":
     fire.Fire(main)
