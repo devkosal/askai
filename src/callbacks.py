@@ -399,9 +399,9 @@ class TrainStatsCallback(Callback):
         self.iter += 1
         if self.n_iter % self.update_freq == 0:
             metric_names = ["loss"] + [m.__name__ for m in self.qa_avg_stats.train_stats.metrics]
-            stats = [round(i,3) for i in self.qa_avg_stats.train_stats.avg_stats]
-            named_stats = {"loss": stats[0]}
+            stats = self.qa_avg_stats.train_stats.avg_stats
+            named_stats = {"loss": round(stats[0],5)}
             for (n,st) in zip(metric_names[1:],stats[1:]):
-                named_stats[n] = round(st.item(),3)
-                
+                named_stats[n] = round(st.item(),5)
+
             self.logger.info(f"epoch {self.epoch} stats for iter {self.iter} out of {self.iters} iters are : {named_stats}")
