@@ -4,8 +4,8 @@ from .basics import *
 from .callbacks import *
 from tqdm import tqdm
 import collections
-# also look up tok and num prcoesses implementations for opinions data http://localhost:8888/notebooks/devai/RoBERTa%20with%20Devai%20-%20Text%20Summarization.ipynb
 from concurrent.futures import ProcessPoolExecutor
+
 
 def parallel(func, arr, max_workers=4):
     if max_workers<2: results = list(progress_bar(map(func, enumerate(arr)), total=len(arr)))
@@ -13,6 +13,7 @@ def parallel(func, arr, max_workers=4):
         with ProcessPoolExecutor(max_workers=max_workers) as ex:
             return list(progress_bar(ex.map(func, enumerate(arr)), total=len(arr)))
     if any([o is not None for o in results]): return results
+
 
 class QATokenizerProcessor(Processor):
     """tokenizer processor for input text"""
@@ -24,6 +25,7 @@ class QATokenizerProcessor(Processor):
     def proc1(self, x): return [self.start_tok] + self.tok_func(x)[:self.max_sl-2] + [self.end_tok]
 
     def __call__(self, items): return tqdm([self.proc1(x) for x in items])
+
 
 class QANumericalizeProcessor(Processor):
     """
@@ -39,6 +41,7 @@ class QANumericalizeProcessor(Processor):
         if getattr(self, 'otoi', None) is None:
             self.otoi = collections.defaultdict(int,{v:k for k,v in enumerate(self.vocab)})
         return tqdm([self.proc1(x) for x in items])
+
 
 class QALabelProcessor(Processor):
     """creates index and is_impossible labels for QA MTL task"""
@@ -56,15 +59,19 @@ class QALabelProcessor(Processor):
             self.otoi  = {v:k for k,v in enumerate(self.vocab)}
         return [(self.index_proc1(item[0]),self.cat_proc1(item[1])) for item in items]
 
+
 # samplers
 from torch.utils.data import Sampler
 
 class SortSampler(Sampler):
     """samples observations sorted by length to ensure batches contain similarly sized sequences"""
     def __init__(self, data_source, key): self.data_source,self.key = data_source,key
+
     def __len__(self): return len(self.data_source)
+
     def __iter__(self):
         return iter(sorted(list(range(len(self.data_source))), key=self.key, reverse=True))
+
 
 class SortishSampler(Sampler):
     """
@@ -88,6 +95,7 @@ class SortishSampler(Sampler):
         sorted_idx = torch.cat([batches[0], sorted_idx, batches[-1]])
         return iter(sorted_idx)
 
+
 def pad_collate(samples, pad_idx=1, pad_first=False):
     """pads and collates input and labels into a single tensor"""
     max_len = max([len(s[0]) for s in samples])
@@ -96,6 +104,7 @@ def pad_collate(samples, pad_idx=1, pad_first=False):
         if pad_first: res[i, -len(s[0]):] = torch.LongTensor(s[0])
         else:         res[i, :len(s[0]) ] = torch.LongTensor(s[0])
     return res, tensor([s[1] for s in samples])
+
 
 def pad_collate_qa(samples, pad_idx, pad_first=False):
     """pads and collates inputs and labels for QA into a single tensor"""
@@ -107,6 +116,7 @@ def pad_collate_qa(samples, pad_idx, pad_first=False):
     qa_idxs = torch.cat([s[1][0].unsqueeze(0) for s in samples])
     imp_labels = torch.tensor([s[1][1] for s in samples])
     return res, (qa_idxs, imp_labels)
+
 
 def pad_collate_x(samples, pad_idx, pad_first=False):
     """pads and collates only inputs into a single tensor. useful for inference when labels don't exist"""

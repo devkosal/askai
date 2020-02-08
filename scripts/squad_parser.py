@@ -5,6 +5,7 @@ from pathlib import Path
 from transformers import AutoTokenizer
 from tqdm import tqdm
 
+
 def squad_parser(directory, tok , data_set: str, squad_version: str = "2.0"):
     """
     convert squad train and dev jsons to df. works for both 1.1 and 2.0 datasets
@@ -69,6 +70,7 @@ def squad_json_to_csv(path_to_jsons_dir, path_to_csv_dir=None, model="albert-bas
     train.to_csv(Path(path_to_csv_dir)/f"train_{squad_version}_{model_name}.csv",index=False)
     val.to_csv(Path(path_to_csv_dir)/f"val_{squad_version}_{model_name}.csv",index=False)
     logger.info("finished exporting csv files")
+
 
 if __name__ == "__main__":
     logging.basicConfig()

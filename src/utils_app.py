@@ -10,6 +10,7 @@ from itertools import compress
 import sqlite3
 import re
 
+
 # doc retrieval function
 def get_doc_by_id(doc_id, cursor):
     """
@@ -20,6 +21,7 @@ def get_doc_by_id(doc_id, cursor):
     :return: returns the document at id, doc_id
     """
     return cursor.execute(f"select * from documents where id='{doc_id}'").fetchall()
+
 
 def get_scores(text, vectorizer, X):
     """
@@ -71,6 +73,7 @@ def get_contexts(scored_sections,cursor_or_df,k=5,p=.7):
     res = [get_doc_by_id(i,cursor_or_df)[0][1] for i in top_ids] if isinstance(cursor_or_df,sqlite3.Cursor) else [cursor_or_df.text.loc[i] for i in top_ids]
     return res
 
+
 def prep_text(text, question, tok):
     """
     preprocesses text to be inputed into a bert model
@@ -83,6 +86,7 @@ def prep_text(text, question, tok):
     truncate_len = 512 - len(tok_ques) - 3*3
     res = ["[CLS]"] + tok_text[:truncate_len] + ["[SEP]"] + tok_ques + ["[SEP]"]
     return torch.tensor(tok.convert_tokens_to_ids(res)).unsqueeze(0)
+
 
 def get_pred(texts, question, model, tok, pad_idx):
     """

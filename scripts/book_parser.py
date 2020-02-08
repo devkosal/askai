@@ -12,6 +12,7 @@ import fire
 from pathlib import Path
 from bs4 import BeautifulSoup
 
+
 def splitter(string,final=[]):
     """
     splits a longer string into multiple smaller strings
@@ -29,6 +30,7 @@ def splitter(string,final=[]):
         final.append(join1)
         splitter(join2)
     return final
+
 
 def sentence_chunker(book, max_seq_len):
     """
@@ -57,6 +59,7 @@ def sentence_chunker(book, max_seq_len):
     logger.info(f"dropped {rejects} out {len(raw_chunks)} of sections")
     return chunks
 
+
 def soup_chunker(input_html_file):
     """
     uses beautiful soup to divide input text based on <p> tags
@@ -79,6 +82,7 @@ def soup_chunker(input_html_file):
         else:
             current.append(text)
     return chunks
+
 
 def parser(input_html_file, output_dir=None, output_level = "section", max_seq_len=400, jsonl=False):
     """
@@ -115,6 +119,7 @@ def parser(input_html_file, output_dir=None, output_level = "section", max_seq_l
         df.index.name = 'id'
         df.to_csv(output_dir/"sections.csv")
         logger.info(f"saved {len(chunks)} chunks in sections.csv in output_dir {output_dir}")
+
 
 if __name__ == "__main__" :
     logging.basicConfig()

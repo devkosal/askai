@@ -55,6 +55,7 @@ class ListContainer():
 def get_batch(dl, *args,**kwargs):
     return next(iter(dl))
 
+
 def compose(x, funcs, *args, order_key='_order', **kwargs):
     """
     simple functionla programming function to apply a list of functions to x and retunr the result
@@ -66,6 +67,7 @@ def compose(x, funcs, *args, order_key='_order', **kwargs):
     key = lambda o: getattr(o, order_key, 0)
     for f in sorted(listify(funcs), key=key): x = f(x, **kwargs)
     return x
+
 
 # Mix up
 # https://github.com/fastai/course-v3/blob/master/nbs/dl2/10b_mixup_label_smoothing.ipynb
@@ -88,16 +90,21 @@ def unsqueeze(input, dims):
     for dim in listify(dims): input = torch.unsqueeze(input, dim)
     return input
 
+
 def reduce_loss(loss, reduction='mean'):
     return loss.mean() if reduction=='mean' else loss.sum() if reduction=='sum' else loss
 
+
 def lin_comb(v1, v2, beta): return beta*v1 + (1-beta)*v2
+
 
 # https://github.com/fastai/course-v3/blob/master/nbs/dl2/11_train_imagenette.ipynb
 def noop(x): return x
 
+
 class Flatten(nn.Module):
     def forward(self, x): return x.view(x.size(0), -1)
+
 
 # second implementation (to include callbacks)
 def get_batch(dl, learn):
@@ -107,6 +114,7 @@ def get_batch(dl, learn):
     learn('after_fit')
     return learn.xb,learn.yb
 
+
 # https://github.com/fastai/course-v3/blob/master/nbs/dl2/11a_transfer_learning.ipynb
 class AdaptiveConcatPool2d(nn.Module):
     def __init__(self, sz=1):
@@ -115,6 +123,7 @@ class AdaptiveConcatPool2d(nn.Module):
         self.ap = nn.AdaptiveAvgPool2d(sz)
         self.mp = nn.AdaptiveMaxPool2d(sz)
     def forward(self, x): return torch.cat([self.mp(x), self.ap(x)], 1)
+
 
 # transfer learning
 # https://github.com/fastai/course-v3/blob/master/nbs/dl2/11a_transfer_learning.ipynb

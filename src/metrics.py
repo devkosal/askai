@@ -1,7 +1,10 @@
 import torch
 import numpy as np
 import collections
+
+
 def accuracy(out, yb): return (torch.argmax(out, dim=1)==yb).float().mean()
+
 
 # defining the evaluation metrics based on squad evaluation methods
 def acc_qa(input,target,xb):
@@ -10,14 +13,17 @@ def acc_qa(input,target,xb):
     """
     return (accuracy(input[0], target[0][:,0]) + accuracy(input[1], target[0][:,1]))/2.0
 
+
 def acc_pos(input,target,xb):
     """is_impossible accuracy metric for QA MTL"""
     return accuracy(input[2], target[1])
+
 
 def exact_match(input,target,xb):
     """scores 1 if the predicted answer is exactly the same as actual else it scores 0 """
     def _acc(out, yb): return (torch.argmax(out, dim=1)==yb).float()
     return (_acc(input[0], target[0][:,0]) + _acc(input[1], target[0][:,1]) == 2).float().mean()
+
 
 def f1_score(input,target,xb):
     """

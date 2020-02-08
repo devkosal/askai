@@ -2,6 +2,7 @@ from transformers import AlbertPreTrainedModel, AlbertModel, PretrainedConfig
 from torch import nn
 from .utils import set_segments
 
+
 # modified from https://github.com/huggingface/transformers/blob/master/src/transformers/modeling_albert.py
 class AlbertForQuestionAnsweringMTL(AlbertPreTrainedModel):
     def __init__(self, config, askai_config=None):

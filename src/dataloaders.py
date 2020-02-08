@@ -3,11 +3,13 @@ from .utils import *
 from torch.utils.data import DataLoader, SequentialSampler, RandomSampler
 import random
 
+
 class Dataset():
     """simple data structure for storing x and y values"""
     def __init__(self, x, y): self.x,self.y = x,y
     def __len__(self): return len(self.x)
     def __getitem__(self, i): return self.x[i],self.y[i]
+
 
 class DataBunch():
     """Stores train and valid dataloaders"""
@@ -48,13 +50,17 @@ class ItemList(ListContainer):
         if isinstance(res,list): return [self._get(o) for o in res]
         return self._get(res)
 
+
 def grandparent_splitter(fn, valid_name='valid', train_name='train'):
     """splits items based on folder structure"""
     gp = fn.parent.parent.name
     return True if gp==valid_name else False if gp==train_name else None
 
+
 # https://github.com/fastai/course-v3/blob/master/nbs/dl2/11a_transfer_learning.ipynb
 def random_splitter(fn, p_valid): return random.random() < p_valid
+
+
 
 def split_by_func(items, f):
     """ splits by specific function"""
@@ -80,6 +86,7 @@ class SplitData():
 
     def __repr__(self): return f'{self.__class__.__name__}\nTrain: {self.train}\nValid: {self.valid}\n'
 
+
 def databunchify(sd, bs, c_in=None, c_out=None, **kwargs):
     """converts datasets --> dataloaders --> databunch"""
     dls = get_dls(sd.train, sd.valid, bs, **kwargs)
@@ -91,6 +98,7 @@ SplitData.to_databunch = databunchify
 class Processor():
     """simple class to preprocess inputs and labels"""
     def process(self, items): return items
+
 
 class CategoryProcessor(Processor):
     """label processor which creates a 'vocabulary' of uniques items in labels"""
@@ -110,13 +118,18 @@ class CategoryProcessor(Processor):
     def deproc1(self, idx): return self.vocab[idx]
 
 
+
 def parent_labeler(fn):
     """sets labels based on parent folder e.g. train/df.csv"""
     return fn.parent.name
 
+
+
 def _label_by_func(ds, f, cls=ItemList):
     """label items based on function f"""
     return cls([f(o) for o in ds.items], path=ds.path)
+
+
 
 class LabeledData():
     """post labelled data object which stores x and y pairs for each observation"""
@@ -145,10 +158,14 @@ class LabeledData():
     def label_by_func(cls, il, f, proc_x=None, proc_y=None):
         return cls(il, _label_by_func(il, f), proc_x=proc_x, proc_y=proc_y)
 
+
+
 def label_by_func(sd, f, proc_x=None, proc_y=None):
     train = LabeledData.label_by_func(sd.train, f, proc_x=proc_x, proc_y=proc_y)
     valid = LabeledData.label_by_func(sd.valid, f, proc_x=proc_x, proc_y=proc_y)
     return SplitData(train,valid)
+
+
 
 def to_byte_tensor(item):
     res = torch.ByteTensor(torch.ByteStorage.from_buffer(item.tobytes()))
@@ -156,8 +173,12 @@ def to_byte_tensor(item):
     return res.view(h,w,-1).permute(2,0,1)
 to_byte_tensor._order=20
 
+
+
 def to_float_tensor(item): return item.float().div_(255.)
 to_float_tensor._order=30
+
+
 
 class SquadTextList(ItemList):
     @classmethod

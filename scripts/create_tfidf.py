@@ -13,6 +13,7 @@ from pathlib import Path
 import logging
 import fire
 
+
 def create_vectors(path_to_csv, output_dir=None):
     """
     stores vectorizer as a pickle file and tf-idf embeddings for relevant texts
@@ -32,6 +33,7 @@ def create_vectors(path_to_csv, output_dir=None):
     save_npz("tfidf-vectors.npz", X)
     logger.info(f"saving vectorizer as vectorizer.pkl in {output_dir}")
     pickle.dump(vectorizer,open("vectorizer.pkl","wb"))
+
 
 if __name__ == "__main__":
     logging.basicConfig()

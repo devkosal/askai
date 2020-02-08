@@ -4,18 +4,20 @@
 import json, fire, re, os.path
 from pathlib import Path
 
+
 def is_export(cell):
     if cell['cell_type'] != 'code': return False
     src = cell['source']
     if len(src) == 0 or len(src[0]) < 7: return False
-    #import pdb; pdb.set_trace()
     return re.match(r'^\s*#\s*export\s*$', src[0], re.IGNORECASE) is not None
+
 
 def get_py_fname(fname):
     fname = os.path.splitext(fname)[0]
     number = fname.split('_')[0]
     number = number.replace(" ","_").lower()
     return f'{number}.py'
+
 
 def notebook2script(fname):
     fname = Path(fname)
@@ -33,5 +35,6 @@ def notebook2script(fname):
     module = re.sub(r' +$', '', module, flags=re.MULTILINE)
     with open(fname_out,'w') as f: f.write(module[:-2])
     print(f"Converted {fname} to {fname_out}")
+
 
 if __name__ == '__main__': fire.Fire(notebook2script)

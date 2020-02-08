@@ -5,7 +5,9 @@ from .callbacks import *
 from .optimizers import *
 from tqdm import tqdm
 
+
 def normalize(x, m, s): return (x-m)/s
+
 
 def normalize_to(train, valid):
     """
@@ -17,11 +19,16 @@ def normalize_to(train, valid):
     m,s = train.mean(),train.std()
     return normalize(train, m, s), normalize(valid, m, s)
 
+
 def near(a,b): return torch.allclose(a, b, rtol=1e-3, atol=1e-5)
+
+
 def test_near(a,b): test(a,b,near)
+
 
 # Learner
 def param_getter(m): return m.parameters()
+
 
 class Learner():
     def __init__(self, model, data, loss_func, opt_func=sgd_opt, lr=1e-2, splitter=param_getter,

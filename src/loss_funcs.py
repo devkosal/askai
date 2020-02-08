@@ -2,6 +2,7 @@ import torch.nn.functional as F
 from torch import nn
 from .utils import *
 
+
 def cross_entropy_qa_mtl(input, target):
     """
     Summing the cross entropy loss from the starting and ending indices and the secondary binary label
@@ -9,6 +10,7 @@ def cross_entropy_qa_mtl(input, target):
     loss = torch.add(F.cross_entropy(input[0], target[0][:,0]) , F.cross_entropy(input[1], target[0][:,1]))
     poss_loss = F.cross_entropy(input[2], target[1])
     return torch.add(loss, poss_loss)
+
 
 def cross_entropy_qa_mtl_wtd(input, target):
     """
