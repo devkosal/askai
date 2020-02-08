@@ -239,8 +239,11 @@ def save_model_qa(learner, output_dir: Path, model_name, version):
     def _create_dir(dirc):
         if not os.path.exists(dirc): os.mkdir(dirc)
     epoch = learner.epoch
-    metric = round(float(learner.qa_avg_stats.valid_stats.avg_stats[1]),2)
+    stats = learner.qa_avg_stats.valid_stats.avg_stats
+    acc = round(float(stats[1]),2)
+    em  = round(float(stats[3]),2)
+    f1  = round(float(stats[4]),2)
     _create_dir(output_dir)
-    model_dir = f"{re.sub(r'[ :]+','_',str(datetime.now()))}-{model_name}-acc-{metric}-ep-{epoch}-squad_{version}"
+    model_dir = f"{re.sub(r'[ :]+','_',str(datetime.now()))}-{model_name}-acc-{acc}-f1-{f1}-em-{em}-ep-{epoch}-squad_{version}"
     _create_dir(output_dir/model_dir)
     learner.model.save_pretrained(output_dir/model_dir)
