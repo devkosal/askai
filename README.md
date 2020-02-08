@@ -51,7 +51,7 @@ Configurations are json files which contain the following keys:
 - `phases`: the peak for learning rate annealing e.g. .3
 - `optimizer`: choose between 'adam' or 'lamb' e.g. "lamb" 
 - `epochs`: e.g. 1
-- `use_fp16`: e.g. False
+- `use_fp16`: e.g. False (not currently supported)
 - `recreate_ds`: datasets are pickled for faster retraining. setting this to true will recreate the dataset e.g. False
 - `bs`: batchsize e.g. 4
 - `effective_bs`: set this different from bs to determine gradient accumulation steps (i.e. effective_bs/bs) e.g. 4 
