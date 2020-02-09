@@ -135,7 +135,7 @@ def main(config, return_learner=False):
     opt_func = lamb_opt() if config.optimizer.lower() == "lamb" else adam_opt()
 
     learn = get_learner(config, data, opt_func)
-    learn.fit(config.epochs)#,cbs=disc_lr_sched)
+    learn.fit(config.epochs,cbs=disc_lr_sched)
     if return_learner: return learn
 
 if __name__ == "__main__":

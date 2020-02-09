@@ -10,11 +10,11 @@ RUN apt-get update; \
      python3 get-pip.py ; \
      pip3 install torch numpy
 
-RUN pip3 install torch transformers numpy pandas==0.7.0 scikit-learn panel jupyter scipy
+RUN pip3 install torch transformers numpy pandas scikit-learn panel==0.7.0 jupyter scipy matplotlib fastprogress
 
 ADD . ./askai
 
 WORKDIR askai/
 
 # CMD is used to set the command which will be run when the container starts
-CMD ["panel", "serve", "askai_app.py" ,"--port=5006","--allow-websocket-origin=3.213.106.226", "--allow-websocket-origin=textbookqa.com","--allow-websocket-origin=www.textbookqa.com","--args models/2.0/base health_education"]
+CMD ["panel", "serve", "askai_app.py" ,"--port=5006","--allow-websocket-origin=3.213.106.226", "--allow-websocket-origin=textbookqa.com","--allow-websocket-origin=www.textbookqa.com","--args", "models/2.0/base", "health_education"]
