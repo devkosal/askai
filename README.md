@@ -154,6 +154,9 @@ docker run -p 5006:5006 --rm --name app  askai
 
 If you wish to deploy your own example, add `"--args=path/to/model_weights/, your_example_name"` option to the `CMD` line in `docker/Dockerfile`
 
+## Known Issues
+- The progress bar requirement package, Fastprogress, has an [active issue](https://github.com/fastai/fastprogress/issues/49) when training in terminal window. To correct, see this [issue](https://github.com/fastai/fastprogress/issues/49). 
+
 ## Acknowledgments
 
 This project utilized teachings from [Fastai's  Deep Learning from the Foundations Course](https://course.fast.ai/part2) and base architectures from [Huggingface's transformers](https://huggingface.co/transformers/). The example books are from [University of Minnesota's Open Textbook Library](https://open.umn.edu/opentextbooks). 
