@@ -148,7 +148,7 @@ def adam_opt(xtra_step=None, **kwargs):
 def lamb_step(p, lr, mom, mom_damp, step, sqr_mom, sqr_damp, grad_avg, sqr_avg, eps, wd, **kwargs):
     """ 
     Implementtion of LAMB optimizer step which takes the ratio of weights norm to gradients norm.
-    This ratio is multiplied to the LR to slow or speed up updates based on how well general model performance.
+    This ratio is multiplied to the LR to slow or speed up updates.
     """
     debias1 = debias(mom,     mom_damp, step)
     debias2 = debias(sqr_mom, sqr_damp, step)
