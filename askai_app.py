@@ -4,25 +4,20 @@
         #################################################
         # file to edit: notebooks/Askai App.ipynb
 
-import os
-
-import numpy as np
-import torch
-import torch.nn.functional as F
-from transformers import AutoTokenizer, PretrainedConfig
-import sqlite3, os, pandas as pd
-from scipy import stats
+import sqlite3, pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity, pairwise_distances
-from scipy.sparse import save_npz, load_npz
+from scipy.sparse import load_npz
 import pickle
 from pathlib import Path
-from src import AlbertForQuestionAnsweringMTL, Config
-from src.utils_app import get_pred, get_contexts, get_scores, bold_answer
+
+from src.utils_app import get_contexts, get_scores, bold_answer, Config
+
 import pandas as pd
 import re
 import json
 import sys
+from requests import get
 
 
 # check whether we are in a jupyter notebook or a script and set args accordingly
@@ -52,9 +47,9 @@ config = Config(
 
 
 # loading the model and tokenizer
-model = AlbertForQuestionAnsweringMTL.from_pretrained(config.weights) # ensure pytroch_model.bin and config files are saved in directory
-model.eval()
-tok = AutoTokenizer.from_pretrained(config.model)
+# model = AlbertForQuestionAnsweringMTL.from_pretrained(config.weights) # ensure pytroch_model.bin and config files are saved in directory
+# model.eval()
+# tok = AutoTokenizer.from_pretrained(config.model)
 
 
 # determine the data type (whether csv or db)
@@ -99,7 +94,8 @@ def click_cb(event):
     button.name, button.button_type, button.disabled = "Finding Answer...", "success", True # change button to represent processing
     scores = get_scores(question.value, vectorizer, X) # get scored sections in descending order
     contexts = get_contexts(scores, data) # get the most relevant sections' raw texts
-    pred, best_section = get_pred(contexts, question.value, model, tok, config.pad_idx) # get answer, most relevant text
+    res = get("http://flask_api:5000/",data={"texts":contexts,"question":question.value}).json() # get answer, most relevant text
+    pred, best_section = res["pred"],res["best_section"]
     best_section = bold_answer(best_section, pred) # bolding the answer within the section
     section.object = best_section # update section pane's value
     answer.object = pred # update answer pane's value

@@ -116,13 +116,3 @@ def pad_collate_qa(samples, pad_idx, pad_first=False):
     qa_idxs = torch.cat([s[1][0].unsqueeze(0) for s in samples])
     imp_labels = torch.tensor([s[1][1] for s in samples])
     return res, (qa_idxs, imp_labels)
-
-
-def pad_collate_x(samples, pad_idx, pad_first=False):
-    """pads and collates only inputs into a single tensor. useful for inference when labels don't exist"""
-    max_len = max([len(s[0]) for s in samples])
-    res = torch.zeros(len(samples), max_len).long() + pad_idx
-    for i,s in enumerate(samples):
-        if pad_first: res[i, -len(s[0]):] = torch.LongTensor(s[0])
-        else:         res[i, :len(s[0]) ] = torch.LongTensor(s[0])
-    return res

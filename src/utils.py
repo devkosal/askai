@@ -208,19 +208,6 @@ def str2tensor(s):
     return torch.tensor([int(indices[0]), int(indices[1])], dtype=torch.long)
 
 
-def set_segments(x,sep_idx):
-    """identifies token_type_ids for albert to determine which sequence a token belongs to."""
-    res = x.new_zeros(x.size())
-    for row_idx, row in enumerate(x):
-        in_seg_1 = False
-        for val_idx,val in enumerate(row):
-            if val == sep_idx:
-                in_seg_1 = True
-            if in_seg_1:
-                res[row_idx,val_idx] = 1
-    return res
-
-
 def assert_no_negs(tensor):
     """usefule for asserting labels do not contain any negative values"""
     assert torch.all(torch.eq(tensor, abs(tensor)))

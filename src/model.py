@@ -1,7 +1,17 @@
 from transformers import AlbertPreTrainedModel, AlbertModel, PretrainedConfig
 from torch import nn
-from .utils import set_segments
 
+def set_segments(x,sep_idx):
+    """identifies token_type_ids for albert to determine which sequence a token belongs to."""
+    res = x.new_zeros(x.size())
+    for row_idx, row in enumerate(x):
+        in_seg_1 = False
+        for val_idx,val in enumerate(row):
+            if val == sep_idx:
+                in_seg_1 = True
+            if in_seg_1:
+                res[row_idx,val_idx] = 1
+    return res
 
 # modified from https://github.com/huggingface/transformers/blob/master/src/transformers/modeling_albert.py
 class AlbertForQuestionAnsweringMTL(AlbertPreTrainedModel):
@@ -17,7 +27,7 @@ class AlbertForQuestionAnsweringMTL(AlbertPreTrainedModel):
         # classifier for is_impossible second label
         self.poss_drop = nn.Dropout(config.clas_dropout_prob)
         self.poss = nn.Linear(config.hidden_size,config.num_labels_clas)
-        
+
     def forward(
         self,
         input_ids=None,

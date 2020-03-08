@@ -9,8 +9,8 @@ except:
 from flask import Flask
 from flask_restful import reqparse, abort, Api, Resource
 from transformers import AutoTokenizer, PretrainedConfig
-from src import AlbertForQuestionAnsweringMTL
-from src.utils_app import get_pred
+from src.model import AlbertForQuestionAnsweringMTL
+from src.utils_backend import get_pred
 
 app = Flask(__name__)
 api = Api(app)

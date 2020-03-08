@@ -8,12 +8,13 @@ RUN apt-get update; \
      apt-get install python3.7 curl -y ; \
      curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py ; \
      python3 get-pip.py ; \
-     pip3 install torch==1.2.0+cpu -f https://download.pytorch.org/whl/torch_stable.html ; \
-     pip3 install numpy
+     pip3 install torch==1.2.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
-RUN pip3 install transformers pandas scikit-learn flask flask_restful scipy matplotlib fastprogress gunicorn
+RUN pip3 install transformers flask flask_restful gunicorn
 
-ADD ./src ./askai/src
+ADD ./src/model.py ./askai/src/model.py
+
+ADD ./src/utils_backend.py ./askai/src/utils_backend.py
 
 ADD ./models ./askai/models
 
