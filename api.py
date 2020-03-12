@@ -6,6 +6,7 @@ try:
     os.chdir("/Users/devsharma/Dropbox/Projects/tbqa/askai")
 except:
     pass
+
 from flask import Flask
 from flask_restful import reqparse, abort, Api, Resource
 from transformers import AutoTokenizer, PretrainedConfig
@@ -35,10 +36,31 @@ class Model(Resource):
 
         return {"pred":pred,"best_section":best_section}
 
+    def post(self):
+        reqargs = reqparser.parse_args()
+        texts = reqargs["texts"]
+        question = reqargs["question"]
+        assert type(texts) == list, f"input texts are not of type list: {texts}"
+        assert type(question) == str, "input question is not a string"
+        pred, best_section = get_pred(texts, question, model, tok, pad_idx=0)
+
+        return {"pred":pred,"best_section":best_section}
+
+class Test(Resource):
+    def get(self):
+        return {
+        "tests":
+            [
+                {"nm":"test item 1","i":0},
+                {"nm":"test item 2", "i": 1}
+            ]
+        }
+
 ##
 ## Actually setup the Api resource routing here
 ##
 api.add_resource(Model, '/')
+api.add_resource(Test, "/tests")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
