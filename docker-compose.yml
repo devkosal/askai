@@ -1,16 +1,28 @@
-version: '3.7'
+version: "3.7"
 services:
-  flask_app:
+  flask_api:
     build:
-      context: '.'
-      dockerfile: './docker/flask/Dockerfile'
+      context: "."
+      dockerfile: "./docker/flask/Dockerfile"
     container_name: "flask_api"
     ports:
       - "5000:5000"
-  panel_app:
+  react_app:
     build:
       context: "."
-      dockerfile: "./docker/panel/Dockerfile"
-    container_name: "panel_app"
+      dockerfile: "./docker/react/Dockerfile"
+    container_name: "react_app"
     ports:
-      - "5006:5006"
+      - "3000:3000"
+    depends_on:
+      - flask_api
+  nginx:
+    build:
+      context: "."
+      dockerfile: "./docker/nginx/Dockerfile"
+    restart: unless-stopped
+    ports:
+      - 80:80
+    depends_on:
+      - flask_api
+      - react_app

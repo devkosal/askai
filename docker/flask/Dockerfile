@@ -12,9 +12,14 @@ RUN apt-get update; \
 
 RUN pip3 install transformers flask flask_restful gunicorn
 
+RUN pip3 install pandas scikit-learn scipy
+
 ADD ./src/model.py ./askai/src/model.py
 
 ADD ./src/utils_backend.py ./askai/src/utils_backend.py
+
+ADD ./src/utils_app.py ./askai/src/utils_app.py
+ADD ./examples ./askai/examples
 
 ADD ./models ./askai/models
 

@@ -11,3 +11,5 @@ dist/
 build/
 askai/
 .idea/
+node_modules
+.vscode

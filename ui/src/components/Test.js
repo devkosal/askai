@@ -15,10 +15,3 @@ export const Test = ({ tests }) => {
     </List>
   );
 };
-
-// export const Test = ({ tests }) => {
-//   return (
-//     <div>{tests.length}</div>
-//
-//   );
-// }
