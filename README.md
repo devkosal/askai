@@ -6,7 +6,7 @@ Building a Question Answering system with [ALBERT](https://ai.googleblog.com/201
 </p>
 
 ## Overview
-Modern information retrieval techniques are successful in retrieving information from smaller documents. However, when it comes to larger documents, current options fall short. This repository attempts to solve the problem of performing Question Answering on large documents. This requires a two part approach. In one part, ALBERT is trained on the SQuAD QA dataset. In the other, we fragment a textbook into multiple sections using a rule based approach. We can then compare user question embeddings to the embeddings of the sections to find the most relevant section(s). 
+Modern information retrieval techniques are successful in retrieving information from smaller documents. However, when it comes to larger documents, current options fall short. This repository attempts to solve the problem of performing Question Answering on large documents. This requires a two part approach. In one part, ALBERT is trained on the SQuAD QA dataset. In the other, we fragment a textbook into multiple sections using a rule based approach. We can then compare user question embeddings to the embeddings of the sections to find the most relevant section(s).
 
 Both parts come together when relevant sections along with the user question are passed to ALBERT to produce the predicted answer:
 
@@ -26,7 +26,7 @@ and install requirements:
 
 In this module, we train Albert on the [SQuAD 2.0](https://rajpurkar.github.io/SQuAD-explorer/) dataset.
 
-1. Parse the json files to create csv files 
+1. Parse the json files to create csv files
 
 These will be easier for our dataloaders to read. Use the following script (`output dir` should contain the train and dev json files from SQuAD):
 
@@ -43,18 +43,18 @@ Configurations are json files which contain the following keys:
 - `task`: task name e.g. "SQuAD"
 - `squad_version`: the version of squad data e.g. "2.0"
 - `testing`: whether you want to test on a smaller subset of data (weights are not stored when testing) e.g. True
-- `data_reduction`: reduce csv sizes by this amount while testing e.g. 1000 
+- `data_reduction`: reduce csv sizes by this amount while testing e.g. 1000
 - `seed`: random seed e.g. 2020
 - `model`: the model name from huggingface's transformers e.g. "albert-base-v2"
 - `max_lr`: max learning rate for base albert model e.g. 3e-5
 - `max_lr_last`: max learning rate for final layers e.g. 1e-4
 - `phases`: the peak for learning rate annealing e.g. .3
-- `optimizer`: choose between 'adam' or 'lamb' e.g. "lamb" 
+- `optimizer`: choose between 'adam' or 'lamb' e.g. "lamb"
 - `epochs`: e.g. 1
 - `use_fp16`: e.g. False (not currently supported)
 - `recreate_ds`: datasets are pickled for faster retraining. setting this to true will recreate the dataset e.g. False
 - `bs`: batchsize e.g. 4
-- `effective_bs`: set this different from bs to determine gradient accumulation steps (i.e. effective_bs/bs) e.g. 4 
+- `effective_bs`: set this different from bs to determine gradient accumulation steps (i.e. effective_bs/bs) e.g. 4
 - `max_seq_len`: max sequence length e.g. 512
 - `start_tok`: start of sequence token e.g. "[CLS]"
 - `end_tok`: end of sequence token e.g. "[SEP]"
@@ -68,7 +68,7 @@ Configurations are json files which contain the following keys:
 - `save_checkpoint`: whether checkpoints are saved e.g. True
 - `load_checkpoint`: loads existing checkpoint e.g. "2.0/base"
 - `num_labels_clas`: number of labels for 'is_impossible' label e.g. 2
-- `clas_dropout_prob`: the dropout probability for final layer of 'is_impossible' classifier e.g. .1 
+- `clas_dropout_prob`: the dropout probability for final layer of 'is_impossible' classifier e.g. .1
 - `stats_update_freq`: how frequently stat updates occur e.g. .1
 
 3. Execute the training command:
@@ -109,7 +109,7 @@ If you wish to convert to jsonl instead, add `--jsonl` as an argument.
 
 When dealing with larger data, it may be better to convert the data into a relational database `sections.db` instead of a csv. For this, you can use a jsonl file with [DrQA's retreiver script](https://github.com/facebookresearch/DrQA/tree/master/scripts/retriever#storing-the-documents) to create a sqlite db.
 
-### TF-IDF Embeddings 
+### TF-IDF Embeddings
 
 We use TF-IDF embeddings to compare queries to sections. This helps us find relevant sections. To build our TF-IDF vectorizer `vectorizer.pkl` and sparse matrix embeddings `tfidf-vectors.npz`, use:
 
@@ -134,7 +134,7 @@ Configuration `book-config.json` is a json file which carries the following info
     "sample_questions": ["what is health?"]
 }
 ```
-Also add your document's cover image as a PNG `cover.png` of JPG `cover.jpg` file. 
+Also add your document's cover image as a PNG `cover.png` of JPG `cover.jpg` file.
 
 ### Custom Example Demo
 
@@ -147,16 +147,17 @@ Finally, name the folder containing `your_example_name` and place it in the exam
 You can also use a docker container to deploy the app. See the following the example docker commands to build and run a docker image:
 
 ```
-docker build -t askai . -f docker/Dockerfile 
-docker run -p 5006:5006 --rm --name app  askai 
+docker build -t askai . -f docker/Dockerfile
+docker run -p 5006:5006 --rm --name app  askai
 
 ```
 
 If you wish to deploy your own example, add `"--args=path/to/model_weights/, your_example_name"` option to the `CMD` line in `docker/Dockerfile`
 
 ## Known Issues
-- The progress bar requirement package, Fastprogress, has an [active issue](https://github.com/fastai/fastprogress/issues/49) when training in terminal window. To correct, see this [issue](https://github.com/fastai/fastprogress/issues/49). 
+- The progress bar requirement package, Fastprogress, has an [active issue](https://github.com/fastai/fastprogress/issues/49) when training in terminal window. To correct, see this [issue](https://github.com/fastai/fastprogress/issues/49).
+- Currently, this app can run on a [t2.medium](https://aws.amazon.com/ec2/instance-types/) (AWS - 4GB RAM) or equivalent. However, `batchsize` is severely limited in production i.e. we can only check for one section in a batch. Currently, the `k` value in `api.py` is set to `2` (or below). Use a more powerful instance for a higher `batchsize`.
 
 ## Acknowledgments
 
-This project utilized teachings from [Fastai's  Deep Learning from the Foundations Course](https://course.fast.ai/part2) and base architectures from [Huggingface's transformers](https://huggingface.co/transformers/). The example books are from [University of Minnesota's Open Textbook Library](https://open.umn.edu/opentextbooks). 
+This project utilized teachings from [Fastai's  Deep Learning from the Foundations Course](https://course.fast.ai/part2) and base architectures from [Huggingface's transformers](https://huggingface.co/transformers/). The example books are from [University of Minnesota's Open Textbook Library](https://open.umn.edu/opentextbooks).

@@ -71,11 +71,10 @@ class Model(Resource):
         reqargs = reqparser.parse_args()
         question = reqargs["question"]
         assert type(question) == str, "input question is not a string"
-
         # get scored sections in descending order
         scores = get_scores(question, vectorizer, X)
         # get the most relevant sections' raw texts
-        contexts = get_contexts(scores, data)[:1]
+        contexts = get_contexts(scores, data, k=2)
         # get answer, most relevant text
         pred, best_section = get_pred(
             contexts, question, model, tok, pad_idx=config.pad_idx)
