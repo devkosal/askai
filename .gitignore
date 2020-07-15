@@ -13,3 +13,4 @@ askai/
 .idea/
 node_modules
 .vscode
+*.vbs
