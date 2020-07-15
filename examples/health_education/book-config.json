@@ -4,15 +4,18 @@
     "sections_file_type": "db",
     "sample_questions": [
   "",
-  "What is health?",
-  "How many calories should be consumed?",
   "What are functional foods?",
   "What are the types of carbohydrates?",
   "What are proteins?",
   "How many carbs should be had?",
-  "What does the FDA regulate?",
   "What is ptsd?",
   "What causes ptsd?",
   "What is borderline personality disorder?",
-  "What is bipolar disorder?"]
+  "What is bipolar disorder?"],
+  "other_questions":[
+    "What is health?",
+    "How many calories should be consumed?",
+    "What does the FDA regulate?",
+
+  ]
 }
