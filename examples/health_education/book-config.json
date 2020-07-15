@@ -12,10 +12,9 @@
   "What causes ptsd?",
   "What is borderline personality disorder?",
   "What is bipolar disorder?"],
-  "other_questions":[
+    "other_questions":[
     "What is health?",
     "How many calories should be consumed?",
-    "What does the FDA regulate?",
-
+    "What does the FDA regulate?"
   ]
 }
