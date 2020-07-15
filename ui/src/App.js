@@ -5,7 +5,7 @@ import { Container } from "semantic-ui-react";
 
 const example = process.env.REACT_APP_EXAMPLE;
 
-const Cover = require(`./examples/${example}/cover.png`); 
+const Cover = require(`./examples/${example}/cover.png`);
 
 const config = require(`./examples/${example}/book-config.json`);
 
