@@ -33,7 +33,7 @@ from requests import get
 app = Flask(__name__)
 api = Api(app)
 
-example = "health_education"  # default
+example = os.environ["REACT_APP_EXAMPLE"]  # default
 
 # setting and loading configuration variables
 config = Config(
@@ -75,7 +75,7 @@ class Model(Resource):
         # get scored sections in descending order
         scores = get_scores(question, vectorizer, X)
         # get the most relevant sections' raw texts
-        contexts = get_contexts(scores, data)
+        contexts = get_contexts(scores, data)[:1]
         # get answer, most relevant text
         pred, best_section = get_pred(
             contexts, question, model, tok, pad_idx=config.pad_idx)

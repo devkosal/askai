@@ -7,6 +7,9 @@ services:
     container_name: "flask_api"
     ports:
       - "5000:5000"
+    user: root
+    env_file:
+      - "ui/.env"
   react_app:
     build:
       context: "."
@@ -16,6 +19,8 @@ services:
       - "3000:3000"
     depends_on:
       - flask_api
+    env_file:
+      - "ui/.env"
   nginx:
     build:
       context: "."

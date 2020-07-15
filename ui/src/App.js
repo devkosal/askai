@@ -3,12 +3,11 @@ import "./App.css";
 import { QAForm } from "./components/Form";
 import { Container } from "semantic-ui-react";
 
-import Cover from "./examples/health_education/cover.png";
-const example = "health_education";
+const example = process.env.REACT_APP_EXAMPLE;
+
+const Cover = require(`./examples/${example}/cover.png`); 
 
 const config = require(`./examples/${example}/book-config.json`);
-
-// import Cover from `./examples/${example}/cover.png`;
 
 function App() {
   return (

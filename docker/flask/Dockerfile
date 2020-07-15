@@ -1,6 +1,8 @@
 # always defined on the top to set which image we will be loading from
 FROM ubuntu:18.04
 
+RUN whoami
+
 # RUN is for running bash commands
 RUN apt-get update; \
      apt-get install -y software-properties-common; \
