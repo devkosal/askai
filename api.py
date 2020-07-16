@@ -46,6 +46,7 @@ config = Config(
 # ensure pytroch_model.bin and config files are saved in directory
 model = AlbertForQuestionAnsweringMTL.from_pretrained(config.weights)
 model.eval()
+model.share_memory()
 tok = AutoTokenizer.from_pretrained(config.model)
 
 reqparser = reqparse.RequestParser()
@@ -74,7 +75,7 @@ class Model(Resource):
         # get scored sections in descending order
         scores = get_scores(question, vectorizer, X)
         # get the most relevant sections' raw texts
-        contexts = get_contexts(scores, data, k=2)
+        contexts = get_contexts(scores, data, k=4)
         # get answer, most relevant text
         pred, best_section = get_pred(
             contexts, question, model, tok, pad_idx=config.pad_idx)

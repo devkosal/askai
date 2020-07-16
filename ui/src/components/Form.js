@@ -92,11 +92,15 @@ export const QAForm = props => {
         <p style={{ fontSize: 20 }}>
           <b>{ans}</b>
         </p>
-        <div className="ui segment" style={{ textAlign: "left" }}>
+        <div className="ui segment" style={{
+          textAlign: "left", paddingBottom: "15px",
+        }}>
           <h4 className="ui header">Most relevant section:</h4>
-          <p style={{ backgroundColor: "yellow" }}>{parse(`<div>${section}</div>`)}</p>
+          <p style={{
+            backgroundColor: "yellow"
+          }}>{parse(`<div>${section}</div>`)}</p>
         </div>
       </div>
-    </Form>
+    </Form >
   );
 };

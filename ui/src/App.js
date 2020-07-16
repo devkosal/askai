@@ -31,7 +31,7 @@ function App() {
           </p>
           <img
             src={Cover}
-            style={{ margin: 40, height: 400 }}
+            style={{ margin: 40, height: 400, boxShadow: "10px 10px 8px #888888" }}
             alt="textbook cover"
           />
         </div>

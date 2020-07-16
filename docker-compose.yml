@@ -10,6 +10,12 @@ services:
     user: root
     env_file:
       - "ui/.env"
+    deploy:
+      resources:
+        limits:
+          memory: 3000M
+    restart: unless-stopped
+    shm_size: "4gb"
   react_app:
     build:
       context: "."
@@ -21,6 +27,7 @@ services:
       - flask_api
     env_file:
       - "ui/.env"
+    restart: unless-stopped
   nginx:
     build:
       context: "."

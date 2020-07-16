@@ -14,7 +14,7 @@ RUN apt-get update; \
 
 RUN pip3 install transformers flask flask_restful gunicorn
 
-RUN pip3 install pandas scikit-learn scipy
+RUN pip3 install pandas scikit-learn scipy gevent
 
 ADD ./src/model.py ./askai/src/model.py
 
@@ -30,4 +30,6 @@ ADD ./api.py ./askai/api.py
 WORKDIR askai/
 
 # CMD is used to set the command which will be run when the container starts
-CMD ["gunicorn", "-w=4", "api:app", "-b=0.0.0.0:5000"]
+# CMD ["gunicorn", "-w=4", "api:app", "-b=0.0.0.0:5000"]
+
+CMD ["gunicorn", "-k=gevent", "--worker-connections=1000", "api:app", "-b=0.0.0.0:5000"]
