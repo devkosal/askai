@@ -78,7 +78,7 @@ class Model(Resource):
         # get answer, most relevant text
         pred, best_section = get_pred(
             contexts, question, model, tok, pad_idx=config.pad_idx)
-
+        best_section = bold_answer(best_section, pred)
         return {"pred": pred, "best_section": best_section}
 
 

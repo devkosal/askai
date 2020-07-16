@@ -10,6 +10,7 @@ const Cover = require(`./examples/${example}/cover.png`);
 const config = require(`./examples/${example}/book-config.json`);
 
 function App() {
+  document.title = "AskAI - Textbook QA";
   return (
     <div className="App">
       <Container style={{ marginTop: 40 }}>

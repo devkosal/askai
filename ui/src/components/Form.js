@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Form, Input, Button } from "semantic-ui-react";
+const parse = require('html-react-parser');
 
 export const QAForm = props => {
   const [question, setQuestion] = useState("");
@@ -93,7 +94,7 @@ export const QAForm = props => {
         </p>
         <div className="ui segment" style={{ textAlign: "left" }}>
           <h4 className="ui header">Most relevant section:</h4>
-          <p style={{ backgroundColor: "yellow" }}>{section}</p>
+          <p style={{ backgroundColor: "yellow" }}>{parse(`<div>${section}</div>`)}</p>
         </div>
       </div>
     </Form>

@@ -59,7 +59,7 @@ def bold_answer(text, answer):
     if len(answers) < 1: return text
     answer = answers[0] # selecting the first occurence
     p2 = re.compile(f"(.?){answer}(.?)",re.IGNORECASE)
-    return p2.sub(f'\\1**{answer}**\\2', text)
+    return p2.sub(f'\\1<b>{answer}</b>\\2', text)
 
 
 def get_contexts(scored_sections,cursor_or_df,k=5,p=.7):
